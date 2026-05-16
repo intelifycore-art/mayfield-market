@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { requireOnboarded } from "@/lib/auth";
+import { getActiveSocietyId } from "@/lib/society-server";
 import { CategoryTile } from "@/components/resident/category-tile";
 import { VendorCard } from "@/components/resident/vendor-card";
 import { PageHeader } from "@/components/resident/page-header";
@@ -7,7 +7,7 @@ import { PageHeader } from "@/components/resident/page-header";
 export const dynamic = "force-dynamic";
 
 export default async function BrowsePage() {
-  const profile = await requireOnboarded();
+  const societyId = await getActiveSocietyId();
   const supabase = createClient();
 
   const [{ data: cats }, { data: vendors }] = await Promise.all([
@@ -17,11 +17,13 @@ export default async function BrowsePage() {
       .eq("kind", "product")
       .eq("is_active", true)
       .order("sort_order"),
-    supabase
-      .from("vendors")
-      .select("*")
-      .eq("society_id", profile.society_id!)
-      .eq("status", "approved"),
+    societyId
+      ? supabase
+          .from("vendors")
+          .select("*")
+          .eq("society_id", societyId)
+          .eq("status", "approved")
+      : Promise.resolve({ data: [] as any[] }),
   ]);
 
   return (
@@ -43,7 +45,7 @@ export default async function BrowsePage() {
           <p className="text-sm text-ink-muted">No approved vendors yet.</p>
         ) : (
           <div className="grid sm:grid-cols-2 gap-3">
-            {vendors.map((v) => (
+            {vendors.map((v: any) => (
               <VendorCard key={v.id} vendor={v} />
             ))}
           </div>

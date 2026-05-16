@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { requireOnboarded } from "@/lib/auth";
+import { requireProfile } from "@/lib/auth";
 import { PageHeader } from "@/components/resident/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { OrderStatusBadge } from "@/components/resident/order-status";
@@ -16,7 +16,7 @@ export default async function OrderDetailPage({
 }: {
   params: { id: string };
 }) {
-  const profile = await requireOnboarded();
+  const profile = await requireProfile({ next: `/orders/${params.id}` });
   const supabase = createClient();
 
   const { data: order } = await supabase

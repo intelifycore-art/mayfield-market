@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { ChevronRight, Sparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { requireOnboarded } from "@/lib/auth";
+import { getCurrentProfile } from "@/lib/auth";
+import { getActiveSocietyId } from "@/lib/society-server";
 import { ResidentHeader } from "@/components/resident/header";
 import { CategoryTile } from "@/components/resident/category-tile";
 import { VendorCard } from "@/components/resident/vendor-card";
@@ -17,11 +18,12 @@ function greeting(name?: string | null) {
   const hour = new Date().getHours();
   const time = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
   const first = name?.trim().split(" ")[0];
-  return first ? `${time}, ${first}` : time;
+  return first ? `${time}, ${first}` : `${time}, neighbor`;
 }
 
 export default async function HomePage() {
-  const profile = await requireOnboarded();
+  const profile = await getCurrentProfile();
+  const societyId = await getActiveSocietyId();
   const supabase = createClient();
 
   const [{ data: productCats }, { data: serviceCats }, { data: vendors }, { data: recentOrders }] =
@@ -40,29 +42,33 @@ export default async function HomePage() {
         .eq("is_active", true)
         .order("sort_order")
         .limit(4),
-      supabase
-        .from("vendors")
-        .select("*")
-        .eq("society_id", profile.society_id!)
-        .eq("status", "approved")
-        .order("created_at", { ascending: false })
-        .limit(6),
-      supabase
-        .from("orders")
-        .select("id, status, total, placed_at, vendor:vendors(business_name)")
-        .eq("resident_id", profile.id)
-        .order("placed_at", { ascending: false })
-        .limit(3),
+      societyId
+        ? supabase
+            .from("vendors")
+            .select("*")
+            .eq("society_id", societyId)
+            .eq("status", "approved")
+            .order("created_at", { ascending: false })
+            .limit(6)
+        : Promise.resolve({ data: [] as any[] }),
+      profile
+        ? supabase
+            .from("orders")
+            .select("id, status, total, placed_at, vendor:vendors(business_name)")
+            .eq("resident_id", profile.id)
+            .order("placed_at", { ascending: false })
+            .limit(3)
+        : Promise.resolve({ data: [] as any[] }),
     ]);
 
   const flatLabel =
-    profile.tower && profile.flat_no
+    profile?.tower && profile?.flat_no
       ? `${profile.tower} · ${profile.flat_no}`
-      : profile.flat_no;
+      : profile?.flat_no;
 
   return (
     <>
-      <ResidentHeader greeting={greeting(profile.full_name)} flatLabel={flatLabel} />
+      <ResidentHeader greeting={greeting(profile?.full_name)} flatLabel={flatLabel} />
 
       <section className="px-5 mt-1">
         <Card className="bg-brand-tint border-brand/15">
@@ -139,7 +145,7 @@ export default async function HomePage() {
           </div>
         ) : (
           <div className="grid sm:grid-cols-2 gap-3">
-            {vendors.map((v) => (
+            {vendors.map((v: any) => (
               <VendorCard key={v.id} vendor={v} />
             ))}
           </div>

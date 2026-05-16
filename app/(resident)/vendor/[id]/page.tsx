@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Phone, MessageCircle, Clock, Star, CalendarPlus } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { requireOnboarded } from "@/lib/auth";
+import { getActiveSocietyId } from "@/lib/society-server";
 import { PageHeader } from "@/components/resident/page-header";
 import { ListingCard } from "@/components/resident/listing-card";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,7 +15,7 @@ import { Rupees } from "@/components/ui/rupees";
 export const dynamic = "force-dynamic";
 
 export default async function VendorPage({ params }: { params: { id: string } }) {
-  const profile = await requireOnboarded();
+  const societyId = await getActiveSocietyId();
   const supabase = createClient();
 
   const { data: vendor } = await supabase
@@ -24,7 +24,8 @@ export default async function VendorPage({ params }: { params: { id: string } })
     .eq("id", params.id)
     .single();
 
-  if (!vendor || vendor.society_id !== profile.society_id) notFound();
+  if (!vendor) notFound();
+  if (societyId && vendor.society_id !== societyId) notFound();
 
   const [{ data: listings }, { data: services }, { data: stats }] = await Promise.all([
     supabase

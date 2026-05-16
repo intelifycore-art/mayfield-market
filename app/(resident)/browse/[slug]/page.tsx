@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { requireOnboarded } from "@/lib/auth";
+import { getActiveSocietyId } from "@/lib/society-server";
 import { VendorCard } from "@/components/resident/vendor-card";
 import { PageHeader } from "@/components/resident/page-header";
 import { Empty } from "@/components/ui/empty";
@@ -13,7 +13,7 @@ export default async function CategoryPage({
 }: {
   params: { slug: string };
 }) {
-  const profile = await requireOnboarded();
+  const societyId = await getActiveSocietyId();
   const supabase = createClient();
 
   const { data: category } = await supabase
@@ -24,7 +24,6 @@ export default async function CategoryPage({
 
   if (!category) notFound();
 
-  // Find vendors who either: have a listing in this category (product), OR are categorized as such
   const { data: vendorIds } = await supabase
     .from("vendor_categories")
     .select("vendor_id")
@@ -32,12 +31,14 @@ export default async function CategoryPage({
 
   const ids = (vendorIds ?? []).map((v) => v.vendor_id);
 
-  const { data: vendors } = await supabase
-    .from("vendors")
-    .select("*")
-    .eq("society_id", profile.society_id!)
-    .eq("status", "approved")
-    .in("id", ids.length > 0 ? ids : ["00000000-0000-0000-0000-000000000000"]);
+  const { data: vendors } = societyId
+    ? await supabase
+        .from("vendors")
+        .select("*")
+        .eq("society_id", societyId)
+        .eq("status", "approved")
+        .in("id", ids.length > 0 ? ids : ["00000000-0000-0000-0000-000000000000"])
+    : { data: [] as any[] };
 
   return (
     <>
@@ -55,7 +56,7 @@ export default async function CategoryPage({
           />
         ) : (
           <div className="grid sm:grid-cols-2 gap-3">
-            {vendors.map((v) => (
+            {vendors.map((v: any) => (
               <VendorCard key={v.id} vendor={v} />
             ))}
           </div>

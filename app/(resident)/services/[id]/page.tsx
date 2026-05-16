@@ -1,10 +1,14 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { requireOnboarded } from "@/lib/auth";
+import { getCurrentProfile } from "@/lib/auth";
+import { getActiveSocietyId } from "@/lib/society-server";
 import { PageHeader } from "@/components/resident/page-header";
 import { BookingForm } from "./form";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Rupees } from "@/components/ui/rupees";
+import { LogIn } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +17,8 @@ export default async function ServiceBookingPage({
 }: {
   params: { id: string };
 }) {
-  const profile = await requireOnboarded();
+  const profile = await getCurrentProfile();
+  const societyId = await getActiveSocietyId();
   const supabase = createClient();
 
   const { data: service } = await supabase
@@ -24,10 +29,9 @@ export default async function ServiceBookingPage({
     .eq("id", params.id)
     .single();
 
-  if (!service || (service.vendor as any).society_id !== profile.society_id) {
-    notFound();
-  }
+  if (!service) notFound();
   const vendor = service.vendor as any;
+  if (societyId && vendor.society_id !== societyId) notFound();
 
   return (
     <>
@@ -50,15 +54,33 @@ export default async function ServiceBookingPage({
           </CardContent>
         </Card>
 
-        <BookingForm
-          serviceId={service.id}
-          serviceName={service.name}
-          vendorId={vendor.id}
-          societyId={profile.society_id!}
-          defaultFlat={profile.flat_no ?? ""}
-          defaultTower={profile.tower ?? ""}
-          defaultPhone={profile.phone ?? ""}
-        />
+        {profile ? (
+          <BookingForm
+            serviceId={service.id}
+            serviceName={service.name}
+            vendorId={vendor.id}
+            societyId={profile.society_id ?? societyId ?? ""}
+            defaultFlat={profile.flat_no ?? ""}
+            defaultTower={profile.tower ?? ""}
+            defaultPhone={profile.phone ?? ""}
+          />
+        ) : (
+          <Card>
+            <CardContent className="p-6 text-center space-y-3">
+              <p className="text-sm font-medium">Sign in to book</p>
+              <p className="text-xs text-ink-muted">
+                We need your flat number and a contact phone to send the request to the
+                vendor.
+              </p>
+              <Link href={`/login?next=${encodeURIComponent(`/services/${service.id}`)}`}>
+                <Button variant="brand" size="lg" className="w-full">
+                  <LogIn className="h-4 w-4" />
+                  Sign in to continue
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </>
   );

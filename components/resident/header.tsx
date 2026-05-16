@@ -13,7 +13,7 @@ export function ResidentHeader({
   return (
     <header className="px-5 pt-5 pb-3 max-w-2xl mx-auto">
       <div className="flex items-start justify-between gap-3">
-        <Link href="/home">
+        <Link href="/">
           <Logo size="sm" />
         </Link>
         <div className="text-right">

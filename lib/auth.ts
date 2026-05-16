@@ -18,10 +18,16 @@ export async function getCurrentProfile(): Promise<Profile | null> {
 
 /**
  * Like getCurrentProfile but redirects to /login if not signed in.
+ * Pass `next` to redirect back to a specific URL after login.
  */
-export async function requireProfile(redirectTo = "/login"): Promise<Profile> {
+export async function requireProfile(opts: { next?: string } = {}): Promise<Profile> {
   const profile = await getCurrentProfile();
-  if (!profile) redirect(redirectTo);
+  if (!profile) {
+    const target = opts.next
+      ? `/login?next=${encodeURIComponent(opts.next)}`
+      : "/login";
+    redirect(target);
+  }
   return profile;
 }
 
@@ -29,8 +35,8 @@ export async function requireProfile(redirectTo = "/login"): Promise<Profile> {
  * Redirects to /login if not signed in, or to /onboarding if profile isn't set up yet
  * (no society + flat for residents, no business name for vendors).
  */
-export async function requireOnboarded(): Promise<Profile> {
-  const profile = await requireProfile();
+export async function requireOnboarded(opts: { next?: string } = {}): Promise<Profile> {
+  const profile = await requireProfile(opts);
   if (!profile.society_id || (profile.role === "resident" && !profile.flat_no)) {
     redirect("/onboarding");
   }

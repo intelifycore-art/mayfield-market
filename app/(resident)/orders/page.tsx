@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { requireOnboarded } from "@/lib/auth";
+import { requireProfile } from "@/lib/auth";
 import { PageHeader } from "@/components/resident/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { OrderStatusBadge, BookingStatusBadge } from "@/components/resident/order-status";
@@ -12,7 +12,7 @@ import { relativeTime } from "@/lib/format";
 export const dynamic = "force-dynamic";
 
 export default async function OrdersPage() {
-  const profile = await requireOnboarded();
+  const profile = await requireProfile({ next: "/orders" });
   const supabase = createClient();
 
   const [{ data: orders }, { data: bookings }] = await Promise.all([

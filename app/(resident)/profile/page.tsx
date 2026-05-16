@@ -1,4 +1,4 @@
-import { requireOnboarded } from "@/lib/auth";
+import { requireProfile } from "@/lib/auth";
 import { PageHeader } from "@/components/resident/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { SOCIETY, fullSocietyName } from "@/lib/society";
 export const dynamic = "force-dynamic";
 
 export default async function ProfilePage() {
-  const profile = await requireOnboarded();
+  const profile = await requireProfile({ next: "/profile" });
 
   return (
     <>

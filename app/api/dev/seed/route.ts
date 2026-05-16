@@ -78,7 +78,7 @@ const ACCOUNTS: DevAccount[] = [
           unit: "kg",
           stock: 50,
           category_slug: "fruits-vegetables",
-          image_url: "https://images.unsplash.com/photo-1546470427-a1a4d2b27f50?w=400&q=80",
+          image_url: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400&q=80",
         },
         {
           name: "Onions (nashik)",

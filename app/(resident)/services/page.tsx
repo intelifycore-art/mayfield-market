@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { requireOnboarded } from "@/lib/auth";
+import { getActiveSocietyId } from "@/lib/society-server";
 import { PageHeader } from "@/components/resident/page-header";
 import { CategoryTile } from "@/components/resident/category-tile";
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,7 +16,7 @@ export default async function ServicesPage({
 }: {
   searchParams: { cat?: string };
 }) {
-  const profile = await requireOnboarded();
+  const societyId = await getActiveSocietyId();
   const supabase = createClient();
 
   const { data: cats } = await supabase
@@ -32,21 +32,20 @@ export default async function ServicesPage({
     categoryId = found?.id;
   }
 
-  // Fetch services for approved vendors in this society
-  let query = supabase
-    .from("services")
-    .select(
-      "id, name, description, starting_price, pricing_unit, vendor:vendors!inner(id, business_name, society_id, status, photo_url, is_open)",
-    )
-    .eq("is_active", true)
-    .eq("vendor.society_id", profile.society_id!)
-    .eq("vendor.status", "approved");
-
-  if (categoryId) {
-    query = query.eq("category_id", categoryId);
+  let services: any[] = [];
+  if (societyId) {
+    let query = supabase
+      .from("services")
+      .select(
+        "id, name, description, starting_price, pricing_unit, vendor:vendors!inner(id, business_name, society_id, status, photo_url, is_open)",
+      )
+      .eq("is_active", true)
+      .eq("vendor.society_id", societyId)
+      .eq("vendor.status", "approved");
+    if (categoryId) query = query.eq("category_id", categoryId);
+    const { data } = await query.order("name").limit(50);
+    services = data ?? [];
   }
-
-  const { data: services } = await query.order("name").limit(50);
 
   return (
     <>
@@ -70,7 +69,7 @@ export default async function ServicesPage({
         <h2 className="display text-base font-semibold mb-3">
           {searchParams.cat ? "Matching services" : "All services"}
         </h2>
-        {!services || services.length === 0 ? (
+        {services.length === 0 ? (
           <Empty
             icon={<Wrench className="h-8 w-8" />}
             title="No services yet"

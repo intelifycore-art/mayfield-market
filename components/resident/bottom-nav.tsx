@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Grid3x3, ShoppingBag, Receipt, User } from "lucide-react";
+import { Home, Grid3x3, ShoppingBag, Receipt, User, LogIn } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/lib/cart-store";
 
@@ -10,11 +10,10 @@ const TABS = [
   { href: "/home", label: "Home", icon: Home },
   { href: "/browse", label: "Browse", icon: Grid3x3 },
   { href: "/cart", label: "Cart", icon: ShoppingBag, badge: true },
-  { href: "/orders", label: "Orders", icon: Receipt },
-  { href: "/profile", label: "Profile", icon: User },
+  { href: "/orders", label: "Orders", icon: Receipt, requiresAuth: true },
 ] as const;
 
-export function BottomNav() {
+export function BottomNav({ signedIn = true }: { signedIn?: boolean }) {
   const pathname = usePathname();
   const items = useCart((s) => s.items);
   const totalQty = items.reduce((sum, i) => sum + i.qty, 0);
@@ -28,10 +27,14 @@ export function BottomNav() {
               ? pathname === "/home" || pathname === "/"
               : pathname.startsWith(tab.href);
           const Icon = tab.icon;
+          const href =
+            tab.requiresAuth && !signedIn
+              ? `/login?next=${encodeURIComponent(tab.href)}`
+              : tab.href;
           return (
             <Link
               key={tab.href}
-              href={tab.href}
+              href={href}
               className={cn(
                 "flex flex-col items-center justify-center gap-0.5 py-2.5 text-2xs font-medium transition-colors",
                 active ? "text-brand" : "text-ink-soft hover:text-ink",
@@ -49,6 +52,29 @@ export function BottomNav() {
             </Link>
           );
         })}
+        {/* Profile or Sign in */}
+        <Link
+          href={signedIn ? "/profile" : "/login"}
+          className={cn(
+            "flex flex-col items-center justify-center gap-0.5 py-2.5 text-2xs font-medium transition-colors",
+            (signedIn && pathname.startsWith("/profile")) ||
+              (!signedIn && pathname.startsWith("/login"))
+              ? "text-brand"
+              : "text-ink-soft hover:text-ink",
+          )}
+        >
+          {signedIn ? (
+            <>
+              <User strokeWidth={1.6} className="h-5 w-5" />
+              <span>Profile</span>
+            </>
+          ) : (
+            <>
+              <LogIn strokeWidth={1.6} className="h-5 w-5" />
+              <span>Sign in</span>
+            </>
+          )}
+        </Link>
       </div>
     </nav>
   );
