@@ -7,6 +7,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Rupees } from "@/components/ui/rupees";
 import { Empty } from "@/components/ui/empty";
 import { PageHeader } from "@/components/resident/page-header";
+import { ChatPanel } from "@/components/chat/chat-panel";
+import { PRODUCT_CHAT_SUGGESTIONS } from "@/lib/chat";
 import { Plus, Minus, Trash2, ShoppingBag, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -24,16 +26,26 @@ export default function CartPage() {
       <PageHeader title="Cart" backHref="/" />
       <div className="px-5 py-5 space-y-4 mb-10">
         {!mounted ? null : grouped.length === 0 ? (
-          <Empty
-            icon={<ShoppingBag className="h-10 w-10" />}
-            title="Cart is empty"
-            description="Browse vendors and add some essentials."
-            action={
-              <Link href="/browse">
-                <Button variant="brand">Browse vendors</Button>
-              </Link>
-            }
-          />
+          <>
+            <Empty
+              icon={<ShoppingBag className="h-10 w-10" />}
+              title="Cart is empty"
+              description="Tell me what you need below, or browse the categories."
+              action={
+                <Link href="/browse">
+                  <Button variant="brand">Browse vendors</Button>
+                </Link>
+              }
+            />
+            <ChatPanel
+              variant="inline"
+              title="Stuck? Ask me"
+              subtitle="I'll find what you need on the block"
+              placeholder="e.g. dal, rice, and a dozen eggs..."
+              emptyPrompt="Need ideas?"
+              suggestions={PRODUCT_CHAT_SUGGESTIONS}
+            />
+          </>
         ) : (
           <>
             {grouped.map((g) => (

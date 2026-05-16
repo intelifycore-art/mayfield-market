@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getActiveSocietyId } from "@/lib/society-server";
 import { PageHeader } from "@/components/resident/page-header";
 import { CategoryTile } from "@/components/resident/category-tile";
+import { ChatPanel } from "@/components/chat/chat-panel";
+import { SERVICE_CHAT_SUGGESTIONS } from "@/lib/chat";
 import { Card, CardContent } from "@/components/ui/card";
 import { Rupees } from "@/components/ui/rupees";
 import { Button } from "@/components/ui/button";
@@ -27,9 +29,10 @@ export default async function ServicesPage({
     .order("sort_order");
 
   let categoryId: string | undefined;
+  let activeCat: any = undefined;
   if (searchParams.cat) {
-    const found = (cats ?? []).find((c) => c.slug === searchParams.cat);
-    categoryId = found?.id;
+    activeCat = (cats ?? []).find((c) => c.slug === searchParams.cat);
+    categoryId = activeCat?.id;
   }
 
   let services: any[] = [];
@@ -51,7 +54,18 @@ export default async function ServicesPage({
     <>
       <PageHeader title="Services" subtitle="Help & expertise in your block" />
 
-      <section className="px-5 mt-5">
+      <section className="px-5 mt-4">
+        <ChatPanel
+          variant="inline"
+          title="Need help with something?"
+          subtitle="Describe what you need and I'll match you"
+          placeholder="e.g. a daily maid for 2 hours..."
+          emptyPrompt="Try one of these:"
+          suggestions={SERVICE_CHAT_SUGGESTIONS}
+        />
+      </section>
+
+      <section className="px-5 mt-6">
         <h2 className="display text-base font-semibold mb-3">Browse by type</h2>
         <div className="grid grid-cols-4 gap-2">
           {(cats ?? []).map((c) => (
@@ -67,7 +81,7 @@ export default async function ServicesPage({
 
       <section className="px-5 mt-6 mb-10">
         <h2 className="display text-base font-semibold mb-3">
-          {searchParams.cat ? "Matching services" : "All services"}
+          {activeCat ? activeCat.name : "All services"}
         </h2>
         {services.length === 0 ? (
           <Empty

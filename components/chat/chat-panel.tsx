@@ -11,11 +11,19 @@ import { ChatListings, ChatVendors } from "./chat-results";
 export function ChatPanel({
   variant = "hero",
   initialOpen = true,
-  placeholder = "What are you looking for today?",
+  placeholder,
+  title,
+  subtitle,
+  emptyPrompt,
+  suggestions = CHAT_SUGGESTIONS as unknown as readonly string[],
 }: {
-  variant?: "hero" | "compact";
+  variant?: "hero" | "compact" | "inline";
   initialOpen?: boolean;
   placeholder?: string;
+  title?: string;
+  subtitle?: string;
+  emptyPrompt?: string;
+  suggestions?: readonly string[];
 }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -86,21 +94,62 @@ export function ChatPanel({
 
   const empty = messages.length === 0;
 
+  const heightClass =
+    variant === "hero"
+      ? "min-h-[440px]"
+      : variant === "inline"
+      ? "min-h-[200px]"
+      : "min-h-[280px]";
+
+  const finalTitle = title ?? "How can I help today?";
+  const finalSubtitle = subtitle ?? "Find vendors, products, and services on your block";
+  const finalPlaceholder =
+    placeholder ?? "What are you looking for today?";
+  const finalEmptyPrompt =
+    emptyPrompt ??
+    (variant === "hero"
+      ? "Ask in plain English. I'll find vendors and products that fit."
+      : "Try one of these to start:");
+
   return (
     <div
       className={cn(
         "flex flex-col bg-white border border-line rounded-2xl shadow-card overflow-hidden",
-        variant === "hero" ? "min-h-[360px]" : "min-h-[280px]",
+        heightClass,
       )}
     >
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-line bg-gradient-to-b from-brand-tint/40 to-transparent">
-        <div className="flex items-center gap-2">
-          <div className="h-6 w-6 rounded-md bg-brand text-white grid place-items-center">
-            <Sparkles className="h-3.5 w-3.5" />
+      <div
+        className={cn(
+          "flex items-center justify-between px-4 border-b border-line bg-gradient-to-b from-brand-tint/40 to-transparent",
+          variant === "hero" ? "py-3.5" : "py-2.5",
+        )}
+      >
+        <div className="flex items-center gap-2.5">
+          <div
+            className={cn(
+              "rounded-md bg-brand text-white grid place-items-center shrink-0",
+              variant === "hero" ? "h-8 w-8" : "h-6 w-6",
+            )}
+          >
+            <Sparkles className={variant === "hero" ? "h-4 w-4" : "h-3.5 w-3.5"} />
           </div>
           <div>
-            <p className="text-sm font-semibold leading-tight">Ask Mayfield</p>
-            <p className="text-2xs text-ink-soft">Find vendors, products, services</p>
+            <p
+              className={cn(
+                "font-semibold leading-tight",
+                variant === "hero" ? "display text-lg" : "text-sm",
+              )}
+            >
+              {finalTitle}
+            </p>
+            <p
+              className={cn(
+                "text-ink-soft",
+                variant === "hero" ? "text-xs" : "text-2xs",
+              )}
+            >
+              {finalSubtitle}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -127,7 +176,12 @@ export function ChatPanel({
 
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         {empty ? (
-          <EmptyState onPick={(s) => send(s)} variant={variant} />
+          <EmptyState
+            onPick={(s) => send(s)}
+            variant={variant}
+            prompt={finalEmptyPrompt}
+            suggestions={suggestions}
+          />
         ) : (
           messages.map((m, i) => <MessageBubble key={i} message={m} />)
         )}
@@ -158,18 +212,30 @@ export function ChatPanel({
             }
           }}
           rows={1}
-          placeholder={placeholder}
-          className="flex-1 resize-none bg-transparent text-sm placeholder:text-ink-faint focus:outline-none px-2 py-2 max-h-28"
+          placeholder={finalPlaceholder}
+          className={cn(
+            "flex-1 resize-none bg-transparent placeholder:text-ink-faint focus:outline-none px-2 py-2 max-h-28",
+            variant === "hero" ? "text-base" : "text-sm",
+          )}
           disabled={busy}
         />
         <Button
           type="submit"
           variant="brand"
-          size="icon"
+          size={variant === "hero" ? "md" : "icon"}
           disabled={busy || !input.trim()}
           className="shrink-0"
         >
-          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+          {busy ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : variant === "hero" ? (
+            <>
+              <Send className="h-4 w-4" />
+              <span className="hidden sm:inline">Ask</span>
+            </>
+          ) : (
+            <Send className="h-4 w-4" />
+          )}
         </Button>
       </form>
     </div>
@@ -179,23 +245,26 @@ export function ChatPanel({
 function EmptyState({
   onPick,
   variant,
+  prompt,
+  suggestions,
 }: {
   onPick: (s: string) => void;
-  variant: "hero" | "compact";
+  variant: "hero" | "compact" | "inline";
+  prompt: string;
+  suggestions: readonly string[];
 }) {
   return (
     <div className="text-center py-2">
-      {variant === "hero" ? (
-        <>
-          <p className="text-sm text-ink-muted">
-            Ask in plain English. Try one of these to start:
-          </p>
-        </>
-      ) : (
-        <p className="text-xs text-ink-soft">Try one of these:</p>
-      )}
+      <p
+        className={cn(
+          "text-ink-muted",
+          variant === "hero" ? "text-sm" : "text-xs",
+        )}
+      >
+        {prompt}
+      </p>
       <div className="mt-3 flex flex-wrap gap-1.5 justify-center">
-        {CHAT_SUGGESTIONS.map((s) => (
+        {suggestions.map((s) => (
           <button
             key={s}
             onClick={() => onPick(s)}

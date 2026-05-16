@@ -78,3 +78,19 @@ export const CHAT_SUGGESTIONS = [
   "What dal do you have",
   "Bananas and apples",
 ] as const;
+
+export const PRODUCT_CHAT_SUGGESTIONS = [
+  "Vegetables under ₹100",
+  "Best fruits today",
+  "I need milk and bread",
+  "Show me the bakery items",
+  "Anything organic",
+] as const;
+
+export const SERVICE_CHAT_SUGGESTIONS = [
+  "Daily maid for 2 hours",
+  "One-time deep clean",
+  "I need a plumber today",
+  "Tuition for class 8",
+  "Move-out cleaning",
+] as const;
