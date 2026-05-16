@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-bg text-ink;
+    font-feature-settings: "cv11", "ss01", "ss03";
+  }
+
+  * {
+    @apply border-line;
+  }
+
+  ::selection {
+    background: theme("colors.brand.tint");
+    color: theme("colors.brand.dark");
+  }
+}
+
+@layer utilities {
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .display {
+    font-family: var(--font-fraunces), Georgia, serif;
+    letter-spacing: -0.01em;
+  }
+
+  /* Hide scrollbars on horizontally scrolling rails */
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Sticky bottom safe area for iOS */
+  .pb-safe {
+    padding-bottom: max(env(safe-area-inset-bottom), 1rem);
+  }
+}
