@@ -21,7 +21,7 @@ export default function CartPage() {
 
   return (
     <>
-      <PageHeader title="Cart" backHref="/home" />
+      <PageHeader title="Cart" backHref="/" />
       <div className="px-5 py-5 space-y-4 mb-10">
         {!mounted ? null : grouped.length === 0 ? (
           <Empty

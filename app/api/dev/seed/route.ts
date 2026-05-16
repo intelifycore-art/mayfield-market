@@ -166,6 +166,93 @@ const ACCOUNTS: DevAccount[] = [
       ],
     },
   },
+  {
+    email: "dev-vendor3@mayfield.local",
+    role: "vendor",
+    full_name: "Anita Devi",
+    phone: "9999900005",
+    vendor: {
+      business_name: "Anita Didi",
+      tagline: "Trusted daily maid · 6 years in Mayfield",
+      description:
+        "Single-person daily housekeeping. Reliable, soft-spoken, knows the block well. Speaks Hindi + basic English. References available from 5 flats in C-Block.",
+      photo_url:
+        "https://images.unsplash.com/photo-1532375810709-75b1da00537c?w=400&q=80",
+      contact_phone: "9999900005",
+      whatsapp_phone: "9999900005",
+      delivery_note: "Available 7am-7pm. Two slots a day max.",
+      category_slugs: ["maids", "home-cleaning"],
+      services: [
+        {
+          name: "Daily housekeeping (1.5 hours)",
+          description:
+            "Sweep, mop, dust, dishes. Mon-Sat, one visit a day, same time.",
+          starting_price: 4500,
+          pricing_unit: "month",
+          category_slug: "maids",
+        },
+        {
+          name: "Daily housekeeping (2 hours)",
+          description: "Above + bathroom clean + laundry folding. Mon-Sat.",
+          starting_price: 6000,
+          pricing_unit: "month",
+          category_slug: "maids",
+        },
+        {
+          name: "Cook + clean combo (3 hours)",
+          description:
+            "Daily housekeeping plus one-meal cooking (you provide groceries). North Indian, vegetarian by default.",
+          starting_price: 8500,
+          pricing_unit: "month",
+          category_slug: "maids",
+        },
+      ],
+    },
+  },
+  {
+    email: "dev-vendor4@mayfield.local",
+    role: "vendor",
+    full_name: "QuickClean Maids Service",
+    phone: "9999900006",
+    vendor: {
+      business_name: "QuickClean Maids",
+      tagline: "On-demand maids · book by the visit or weekly",
+      description:
+        "Pool of 12 trained, verified maids. Same maid on each repeat visit. Pay per visit — no monthly contract. Background-checked, RWA-listed.",
+      photo_url:
+        "https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=400&q=80",
+      contact_phone: "9999900006",
+      whatsapp_phone: "9999900006",
+      delivery_note: "30 min response · Mon-Sun · 7am to 9pm",
+      category_slugs: ["maids", "home-cleaning"],
+      services: [
+        {
+          name: "Single visit (2 hours)",
+          description:
+            "One-off cleaning. Tell us when, we send the nearest available maid.",
+          starting_price: 399,
+          pricing_unit: "visit",
+          category_slug: "maids",
+        },
+        {
+          name: "Weekly visit (4 hours)",
+          description:
+            "One thorough cleaning per week. Same maid each time. 4 visits / month.",
+          starting_price: 2400,
+          pricing_unit: "month",
+          category_slug: "maids",
+        },
+        {
+          name: "Move-in / move-out clean",
+          description:
+            "Empty-apartment deep clean. 4-6 hours, 2 maids. Cabinets, fans, fittings.",
+          starting_price: 2800,
+          pricing_unit: "visit",
+          category_slug: "maids",
+        },
+      ],
+    },
+  },
 ];
 
 export async function POST() {

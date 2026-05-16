@@ -65,7 +65,7 @@ export function OnboardingForm({
     if (role === "vendor") {
       router.replace("/vendor/apply");
     } else {
-      router.replace("/home");
+      router.replace("/");
     }
     router.refresh();
   }

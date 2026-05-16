@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { useCart } from "@/lib/cart-store";
 
 const TABS = [
-  { href: "/home", label: "Home", icon: Home },
+  { href: "/", label: "Home", icon: Home, exact: true },
   { href: "/browse", label: "Browse", icon: Grid3x3 },
   { href: "/cart", label: "Cart", icon: ShoppingBag, badge: true },
   { href: "/orders", label: "Orders", icon: Receipt, requiresAuth: true },
@@ -23,12 +23,12 @@ export function BottomNav({ signedIn = true }: { signedIn?: boolean }) {
       <div className="max-w-2xl mx-auto grid grid-cols-5">
         {TABS.map((tab) => {
           const active =
-            tab.href === "/home"
-              ? pathname === "/home" || pathname === "/"
-              : pathname.startsWith(tab.href);
+            "exact" in tab && tab.exact
+              ? pathname === tab.href
+              : pathname === tab.href || pathname.startsWith(`${tab.href}/`);
           const Icon = tab.icon;
           const href =
-            tab.requiresAuth && !signedIn
+            "requiresAuth" in tab && tab.requiresAuth && !signedIn
               ? `/login?next=${encodeURIComponent(tab.href)}`
               : tab.href;
           return (
@@ -42,7 +42,7 @@ export function BottomNav({ signedIn = true }: { signedIn?: boolean }) {
             >
               <span className="relative">
                 <Icon strokeWidth={1.6} className="h-5 w-5" />
-                {tab.badge && totalQty > 0 ? (
+                {"badge" in tab && tab.badge && totalQty > 0 ? (
                   <span className="absolute -top-1.5 -right-2 min-w-[16px] h-[16px] px-1 rounded-full bg-brand text-white text-[10px] font-semibold grid place-items-center tabular">
                     {totalQty > 9 ? "9+" : totalQty}
                   </span>

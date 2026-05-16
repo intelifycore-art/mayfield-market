@@ -35,7 +35,7 @@ export default async function OnboardingPage() {
   if (profile.society_id && (profile.role !== "resident" || profile.flat_no)) {
     if (profile.role === "admin") redirect("/admin");
     if (profile.role === "vendor") redirect("/vendor");
-    redirect("/home");
+    redirect("/");
   }
 
   return (

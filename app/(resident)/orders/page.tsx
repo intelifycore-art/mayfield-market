@@ -36,7 +36,7 @@ export default async function OrdersPage() {
 
   return (
     <>
-      <PageHeader title="Orders & bookings" backHref="/home" />
+      <PageHeader title="Orders & bookings" backHref="/" />
       <div className="px-5 py-5 space-y-6 mb-10">
         <section>
           <h2 className="display text-base font-semibold mb-3">Orders</h2>

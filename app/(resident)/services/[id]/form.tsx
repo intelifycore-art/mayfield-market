@@ -74,7 +74,7 @@ export function BookingForm({
             <Button variant="outline" onClick={() => router.push("/orders")}>
               View bookings
             </Button>
-            <Button variant="brand" onClick={() => router.push("/home")}>
+            <Button variant="brand" onClick={() => router.push("/")}>
               Done
             </Button>
           </div>

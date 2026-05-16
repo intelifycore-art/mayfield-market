@@ -34,6 +34,7 @@ on conflict (slug) do update set
 -- Categories — services
 -- ---------------------------------------------------------------------------
 insert into public.categories (slug, name, kind, icon, sort_order) values
+  ('maids',            'Maids & House Help',   'service', 'sparkles',  105),
   ('home-cleaning',    'Home Cleaning',        'service', 'spray-can', 110),
   ('cook-tiffin',      'Cook & Tiffin',        'service', 'utensils-crossed', 120),
   ('plumber',          'Plumber',              'service', 'wrench', 130),

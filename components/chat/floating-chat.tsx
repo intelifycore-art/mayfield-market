@@ -1,16 +1,23 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { Sparkles, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ChatPanel } from "./chat-panel";
 
 /**
  * Floating chat trigger that opens a panel from the bottom on mobile and a
- * popover-style sheet on desktop.
+ * popover-style sheet on desktop. Hidden on routes where the chat is the
+ * page's hero (i.e. the landing page) so we don't double up.
  */
+const HIDDEN_ON = new Set(["/"]);
+
 export function FloatingChat() {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
+
+  if (HIDDEN_ON.has(pathname)) return null;
 
   return (
     <>
