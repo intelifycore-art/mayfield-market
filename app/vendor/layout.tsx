@@ -23,13 +23,15 @@ export default async function VendorLayout({ children }: { children: React.React
   return (
     <div className="min-h-screen bg-bg">
       <header className="border-b border-line bg-white">
-        <div className="max-w-5xl mx-auto px-5 py-3 flex items-center justify-between gap-4">
+        <div className="max-w-5xl mx-auto px-4 sm:px-5 py-3 flex items-center justify-between gap-3">
           <Link href="/vendor">
             <Logo size="sm" />
           </Link>
           {vendor ? (
-            <div className="text-right">
-              <p className="text-sm font-medium leading-tight">{vendor.business_name}</p>
+            <div className="text-right min-w-0">
+              <p className="text-sm font-medium leading-tight truncate">
+                {vendor.business_name}
+              </p>
               <p className="text-2xs uppercase tracking-wider text-ink-soft mt-0.5">
                 {vendor.status}
               </p>
@@ -38,7 +40,7 @@ export default async function VendorLayout({ children }: { children: React.React
         </div>
         {vendor ? <VendorNav /> : null}
       </header>
-      <main className="max-w-5xl mx-auto px-5 py-6">{children}</main>
+      <main className="max-w-5xl mx-auto px-4 sm:px-5 py-5 sm:py-6">{children}</main>
     </div>
   );
 }

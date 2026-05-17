@@ -99,10 +99,10 @@ export default async function VendorDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-3 gap-3">
-        <Stat label="Today's orders" value={todayCount.toString()} icon={<ShoppingBag className="h-4 w-4" />} />
-        <Stat label="Today's revenue" value={<Rupees amount={todayRevenue} size="lg" />} icon={<Package className="h-4 w-4" />} />
-        <Stat label="Open queue" value={queueCount.toString()} icon={<Truck className="h-4 w-4" />} />
+      <div className="grid grid-cols-3 gap-2 sm:gap-3">
+        <Stat label="Orders today" value={todayCount.toString()} icon={<ShoppingBag className="h-4 w-4" />} />
+        <Stat label="Revenue today" value={<Rupees amount={todayRevenue} size="lg" />} icon={<Package className="h-4 w-4" />} />
+        <Stat label="In queue" value={queueCount.toString()} icon={<Truck className="h-4 w-4" />} />
       </div>
 
       <section>
@@ -228,10 +228,14 @@ function Stat({
 }) {
   return (
     <Card>
-      <CardContent className="p-4">
-        <div className="text-ink-soft mb-1.5">{icon}</div>
-        <p className="text-2xs uppercase tracking-wider text-ink-soft">{label}</p>
-        <div className="mt-1 text-xl font-semibold tabular">{value}</div>
+      <CardContent className="p-3 sm:p-4">
+        <div className="text-ink-soft mb-1">{icon}</div>
+        <p className="text-2xs uppercase tracking-wider text-ink-soft leading-tight">
+          {label}
+        </p>
+        <div className="mt-1 text-lg sm:text-xl font-semibold tabular leading-none">
+          {value}
+        </div>
       </CardContent>
     </Card>
   );

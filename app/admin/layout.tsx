@@ -13,18 +13,18 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div className="min-h-screen bg-bg">
       <header className="border-b border-line bg-white">
-        <div className="max-w-6xl mx-auto px-5 py-3 flex items-center justify-between gap-4">
+        <div className="max-w-6xl mx-auto px-4 sm:px-5 py-3 flex items-center justify-between gap-3">
           <Link href="/admin">
             <Logo size="sm" />
           </Link>
-          <div className="text-right">
+          <div className="text-right min-w-0">
             <p className="text-2xs uppercase tracking-wider text-ink-soft">Admin</p>
-            <p className="text-sm font-medium leading-tight">{fullSocietyName()}</p>
+            <p className="text-sm font-medium leading-tight truncate">{fullSocietyName()}</p>
           </div>
         </div>
         <AdminNav />
       </header>
-      <main className="max-w-6xl mx-auto px-5 py-6">{children}</main>
+      <main className="max-w-6xl mx-auto px-4 sm:px-5 py-5 sm:py-6">{children}</main>
     </div>
   );
 }

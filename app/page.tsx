@@ -15,12 +15,12 @@ import { SOCIETY, fullSocietyName } from "@/lib/society";
 import { Logo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CategoryTile } from "@/components/resident/category-tile";
 import { VendorCard } from "@/components/resident/vendor-card";
+import { ProductTile } from "@/components/resident/product-tile";
+import { ServiceTile } from "@/components/resident/service-tile";
 import { ChatPanel } from "@/components/chat/chat-panel";
 import { BottomNav } from "@/components/resident/bottom-nav";
 import { OrderStatusBadge } from "@/components/resident/order-status";
-import { Card, CardContent } from "@/components/ui/card";
 import { Rupees } from "@/components/ui/rupees";
 import { relativeTime } from "@/lib/format";
 
@@ -43,22 +43,45 @@ export default async function LandingPage() {
   const societyId = await getActiveSocietyId();
   const supabase = createClient();
 
-  const [{ data: vendors }, { data: cats }, { data: recentOrders }] = await Promise.all([
+  const [
+    { data: vendors },
+    { data: listings },
+    { data: services },
+    { data: recentOrders },
+  ] = await Promise.all([
     societyId
       ? supabase
           .from("vendors")
           .select("*")
           .eq("society_id", societyId)
           .eq("status", "approved")
+          .eq("is_open", true)
           .order("created_at", { ascending: false })
-          .limit(6)
       : Promise.resolve({ data: [] as any[] }),
-    supabase
-      .from("categories")
-      .select("*")
-      .eq("is_active", true)
-      .order("sort_order")
-      .limit(20),
+    societyId
+      ? supabase
+          .from("listings")
+          .select(
+            "id, name, description, price, unit, image_url, stock, vendor:vendors!inner(id, business_name, society_id, status, is_open)",
+          )
+          .eq("is_active", true)
+          .eq("vendor.society_id", societyId)
+          .eq("vendor.status", "approved")
+          .order("created_at", { ascending: false })
+          .limit(24)
+      : Promise.resolve({ data: [] as any[] }),
+    societyId
+      ? supabase
+          .from("services")
+          .select(
+            "id, name, description, starting_price, pricing_unit, vendor:vendors!inner(id, business_name, society_id, status)",
+          )
+          .eq("is_active", true)
+          .eq("vendor.society_id", societyId)
+          .eq("vendor.status", "approved")
+          .order("created_at", { ascending: false })
+          .limit(12)
+      : Promise.resolve({ data: [] as any[] }),
     profile
       ? supabase
           .from("orders")
@@ -69,28 +92,31 @@ export default async function LandingPage() {
       : Promise.resolve({ data: [] as any[] }),
   ]);
 
-  const productCats = (cats ?? []).filter((c) => c.kind === "product").slice(0, 8);
-  const serviceCats = (cats ?? []).filter((c) => c.kind === "service").slice(0, 5);
   const hasRecent = recentOrders && recentOrders.length > 0;
+  const hasListings = listings && listings.length > 0;
+  const hasServices = services && services.length > 0;
+  const hasVendors = vendors && vendors.length > 0;
 
   return (
     <div className="min-h-screen pb-24 bg-bg">
       {/* Header */}
-      <header className="px-5 sm:px-8 py-5 flex items-center justify-between max-w-6xl mx-auto">
+      <header className="px-5 py-4 flex items-center justify-between max-w-6xl mx-auto">
         <Logo size="md" />
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-2">
           {profile ? (
             <span className="text-sm text-ink-muted hidden sm:inline">
               {profile.full_name?.split(" ")[0] ?? "You"}
             </span>
           ) : (
             <>
-              <Link href="/login?role=vendor">
-                <Button variant="ghost" size="sm" className="hidden sm:flex">
+              <Link href="/login?role=vendor" className="hidden sm:block">
+                <Button variant="ghost" size="sm">
                   <Store className="h-4 w-4" />
                   Vendor sign in
                 </Button>
-                <Button variant="ghost" size="icon" className="sm:hidden">
+              </Link>
+              <Link href="/login?role=vendor" className="sm:hidden">
+                <Button variant="ghost" size="icon">
                   <Store className="h-4 w-4" />
                 </Button>
               </Link>
@@ -105,56 +131,56 @@ export default async function LandingPage() {
       </header>
 
       {/* Hero with chat */}
-      <section className="px-5 sm:px-8 pt-4 pb-10 max-w-6xl mx-auto">
-        <div className="grid lg:grid-cols-5 gap-8 lg:gap-12 items-start">
-          <div className="lg:col-span-2 lg:pt-6">
-            <Badge variant="brand" className="mb-4 inline-flex">
+      <section className="px-5 pt-2 pb-8 max-w-6xl mx-auto">
+        <div className="grid lg:grid-cols-5 gap-6 lg:gap-10 items-start">
+          <div className="lg:col-span-2 lg:pt-4">
+            <Badge variant="brand" className="mb-3 inline-flex">
               <Sparkles className="h-3 w-3" />
-              {fullSocietyName()} · {SOCIETY.location}
+              {fullSocietyName()}
             </Badge>
             {profile ? (
               <h1 className="display text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-[1.05]">
                 {greeting(profile.full_name)}.
               </h1>
             ) : (
-              <h1 className="display text-4xl sm:text-5xl font-semibold tracking-tight leading-[1.05]">
+              <h1 className="display text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-[1.05]">
                 Your block,{" "}
                 <span className="text-brand">delivered</span>.
               </h1>
             )}
-            <p className="mt-4 text-base sm:text-lg text-ink-muted leading-relaxed max-w-md">
+            <p className="mt-3 text-sm sm:text-base text-ink-muted leading-relaxed max-w-md">
               {profile
-                ? `Ask the AI what you need, or browse below. Every order supports a vendor at ${fullSocietyName()}.`
-                : "Fresh produce, daily essentials, and trusted help — from the vendors your neighbors already use. Just ask, and we'll find it on your block."}
+                ? `Ask the AI below, or scroll to see what's available right now.`
+                : "Fresh produce and trusted help — from vendors your neighbors already use. Just ask, or scroll to browse."}
             </p>
-            <div className="mt-6 flex flex-wrap items-center gap-3">
-              <Link href="#shop">
-                <Button size="lg" variant="brand">
-                  {profile ? "Continue shopping" : "Start browsing"}
+            <div className="mt-5 flex flex-wrap gap-2">
+              <a href="#vendors">
+                <Button size="md" variant="brand">
+                  Browse vendors
                   <ArrowRight className="h-4 w-4" />
                 </Button>
-              </Link>
+              </a>
               {!profile ? (
                 <Link href="/login?role=vendor">
-                  <Button size="lg" variant="outline">
+                  <Button size="md" variant="outline">
                     <Store className="h-4 w-4" />
                     I&apos;m a vendor
                   </Button>
                 </Link>
               ) : null}
             </div>
-            <div className="mt-8 grid grid-cols-3 gap-3 max-w-md text-xs">
+            <div className="mt-6 grid grid-cols-3 gap-2 max-w-md text-2xs">
               <Feature
                 icon={<ShieldCheck className="h-4 w-4" />}
-                label="RWA-approved vendors"
+                label="RWA-approved"
               />
               <Feature
                 icon={<Truck className="h-4 w-4" />}
-                label="Direct from your block"
+                label="From your block"
               />
               <Feature
                 icon={<Sparkles className="h-4 w-4" />}
-                label="AI shopping help"
+                label="AI help"
               />
             </div>
           </div>
@@ -165,16 +191,16 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* Recent orders for authed residents */}
+      {/* Recent orders for signed-in residents */}
       {hasRecent ? (
-        <section className="px-5 sm:px-8 pb-6 max-w-6xl mx-auto">
-          <SectionHeading title="Recent orders" link={{ href: "/orders", label: "All orders" }} />
+        <section className="px-5 pb-6 max-w-6xl mx-auto">
+          <SectionHeading title="Your recent orders" link={{ href: "/orders", label: "All" }} />
           <div className="grid sm:grid-cols-3 gap-2">
             {recentOrders!.map((o: any) => (
               <Link
                 key={o.id}
                 href={`/orders/${o.id}`}
-                className="flex items-center gap-3 p-3 bg-white rounded-lg border border-line hover:border-ink/20 transition"
+                className="flex items-center gap-2 p-3 bg-white rounded-lg border border-line hover:border-ink/20 transition"
               >
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">
@@ -182,7 +208,7 @@ export default async function LandingPage() {
                   </p>
                   <p className="text-xs text-ink-soft">{relativeTime(o.placed_at)}</p>
                 </div>
-                <Rupees amount={o.total} />
+                <Rupees amount={o.total} size="sm" />
                 <OrderStatusBadge status={o.status} />
               </Link>
             ))}
@@ -190,54 +216,65 @@ export default async function LandingPage() {
         </section>
       ) : null}
 
-      {/* Browse strip */}
-      <section
-        id="shop"
-        className="px-5 sm:px-8 py-10 bg-white border-y border-line scroll-mt-4"
-      >
-        <div className="max-w-6xl mx-auto">
-          <SectionHeading title="Shop fresh" link={{ href: "/browse", label: "All categories" }} />
-          <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 sm:gap-3">
-            {productCats.map((c) => (
-              <CategoryTile key={c.id} category={c} size="sm" />
-            ))}
-          </div>
-
-          <div className="mt-8">
+      {/* Fresh products */}
+      {hasListings ? (
+        <section className="px-5 py-8 bg-white border-y border-line">
+          <div className="max-w-6xl mx-auto">
             <SectionHeading
-              title="Book a service"
-              link={{ href: "/services", label: "All services" }}
+              title="On the block today"
+              subtitle="Fresh produce and daily essentials from your local vendors"
+              link={{ href: "/browse", label: "Browse all" }}
             />
-            <div className="grid grid-cols-4 sm:grid-cols-5 gap-2 sm:gap-3">
-              {serviceCats.map((c) => (
-                <CategoryTile
-                  key={c.id}
-                  category={c}
-                  href={`/services?cat=${c.slug}`}
-                  size="sm"
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
+              {listings!.slice(0, 12).map((l: any) => (
+                <ProductTile
+                  key={l.id}
+                  listing={l}
+                  vendorId={l.vendor.id}
+                  vendorName={l.vendor.business_name}
                 />
               ))}
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
 
-      {/* Vendor teasers */}
-      <section className="px-5 sm:px-8 py-12 max-w-6xl mx-auto">
+      {/* Services */}
+      {hasServices ? (
+        <section className="px-5 py-8 max-w-6xl mx-auto">
+          <SectionHeading
+            title="Help when you need it"
+            subtitle="Maids, plumbers, tutors and more — trusted by your neighbors"
+            link={{ href: "/services", label: "All services" }}
+          />
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
+            {services!.slice(0, 6).map((s: any) => (
+              <ServiceTile
+                key={s.id}
+                service={s}
+                vendorName={s.vendor.business_name}
+              />
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {/* Vendors */}
+      <section id="vendors" className="px-5 py-8 max-w-6xl mx-auto scroll-mt-4">
         <SectionHeading
           title={`Vendors in ${SOCIETY.block ?? "your block"}`}
-          link={{ href: "/browse", label: "See all" }}
+          subtitle="Tap any vendor to see their full storefront"
         />
-        {vendors && vendors.length > 0 ? (
+        {hasVendors ? (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {vendors.map((v: any) => (
+            {vendors!.map((v: any) => (
               <VendorCard key={v.id} vendor={v} />
             ))}
           </div>
         ) : (
           <div className="bg-white border border-line rounded-lg p-8 text-center">
             <p className="text-sm text-ink-muted">
-              No vendors approved yet. Are you a local vendor?{" "}
+              No vendors approved yet.{" "}
               <Link href="/login?role=vendor" className="text-brand underline">
                 Apply to list your business
               </Link>
@@ -249,21 +286,20 @@ export default async function LandingPage() {
 
       {/* Vendor CTA — only for anon */}
       {!profile ? (
-        <section className="px-5 sm:px-8 py-12 bg-brand text-white">
+        <section className="px-5 py-10 bg-brand text-white">
           <div className="max-w-6xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="max-w-xl">
               <p className="text-2xs uppercase tracking-wider opacity-70">For vendors</p>
-              <h2 className="display text-2xl sm:text-3xl font-semibold mt-1">
+              <h2 className="display text-xl sm:text-2xl font-semibold mt-1">
                 Run a stall or service near {SOCIETY.block ?? "the block"}?
               </h2>
               <p className="mt-2 text-sm opacity-90">
-                List your business with the RWA — sell directly to residents who already
-                trust you. No commission, you handle delivery.
+                List with the RWA — sell directly to residents. No commission.
               </p>
             </div>
             <Link href="/login?role=vendor">
               <Button
-                size="lg"
+                size="md"
                 variant="outline"
                 className="bg-white text-brand-dark border-white hover:bg-bg-subtle"
               >
@@ -274,7 +310,7 @@ export default async function LandingPage() {
         </section>
       ) : null}
 
-      <footer className="px-5 sm:px-8 py-10 text-center text-2xs uppercase tracking-wider text-ink-soft">
+      <footer className="px-5 py-8 text-center text-2xs uppercase tracking-wider text-ink-soft">
         Made for {fullSocietyName()} · {SOCIETY.location}
       </footer>
 
@@ -285,21 +321,28 @@ export default async function LandingPage() {
 
 function SectionHeading({
   title,
+  subtitle,
   link,
 }: {
   title: string;
+  subtitle?: string;
   link?: { href: string; label: string };
 }) {
   return (
-    <div className="flex items-baseline justify-between mb-3">
-      <h2 className="display text-xl sm:text-2xl font-semibold tracking-tight">{title}</h2>
-      {link ? (
-        <Link
-          href={link.href}
-          className="text-xs text-ink-muted hover:text-ink flex items-center gap-0.5"
-        >
-          {link.label} <ChevronRight className="h-3 w-3" />
-        </Link>
+    <div className="mb-4">
+      <div className="flex items-baseline justify-between gap-2">
+        <h2 className="display text-xl sm:text-2xl font-semibold tracking-tight">{title}</h2>
+        {link ? (
+          <Link
+            href={link.href}
+            className="text-xs text-ink-muted hover:text-ink flex items-center gap-0.5 shrink-0"
+          >
+            {link.label} <ChevronRight className="h-3 w-3" />
+          </Link>
+        ) : null}
+      </div>
+      {subtitle ? (
+        <p className="text-xs sm:text-sm text-ink-muted mt-0.5">{subtitle}</p>
       ) : null}
     </div>
   );
@@ -307,7 +350,7 @@ function SectionHeading({
 
 function Feature({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
-    <div className="flex flex-col items-start gap-1.5 text-ink-muted">
+    <div className="flex flex-col items-start gap-1 text-ink-muted">
       <span className="text-brand">{icon}</span>
       <span className="leading-tight">{label}</span>
     </div>

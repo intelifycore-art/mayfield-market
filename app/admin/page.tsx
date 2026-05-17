@@ -191,10 +191,14 @@ function Stat({
 }) {
   return (
     <Card className={accent ? "border-warning/30 bg-warning-tint/30" : undefined}>
-      <CardContent className="p-4">
-        <div className="text-ink-soft mb-1.5">{icon}</div>
-        <p className="text-2xs uppercase tracking-wider text-ink-soft">{label}</p>
-        <div className="mt-1 text-xl font-semibold tabular">{value}</div>
+      <CardContent className="p-3 sm:p-4">
+        <div className="text-ink-soft mb-1">{icon}</div>
+        <p className="text-2xs uppercase tracking-wider text-ink-soft leading-tight">
+          {label}
+        </p>
+        <div className="mt-1 text-lg sm:text-xl font-semibold tabular leading-none">
+          {value}
+        </div>
       </CardContent>
     </Card>
   );
