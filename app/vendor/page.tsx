@@ -66,7 +66,7 @@ export default async function VendorDashboard() {
   }
 
   // Approved — show actionable queue
-  const [{ data: openOrders }, { data: pendingBookings }, kpi] = await Promise.all([
+  const [{ data: openOrders }, { data: pendingBookings }] = await Promise.all([
     supabase
       .from("orders")
       .select("*, items:order_items(qty, name_snapshot, unit, line_total)")
@@ -79,7 +79,6 @@ export default async function VendorDashboard() {
       .eq("vendor_id", vendor.id)
       .in("status", ["requested", "confirmed", "in_progress"])
       .order("created_at", { ascending: false }),
-    supabase.rpc("vendor_daily_summary", { v_id: vendor.id }).then(() => null).catch(() => null),
   ]);
 
   // Fallback KPI computed in app
