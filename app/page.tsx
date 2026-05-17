@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import {
   ArrowRight,
   Store,
@@ -36,9 +35,14 @@ function greeting(name?: string | null) {
 export default async function LandingPage() {
   const profile = await getCurrentProfile();
 
-  // Vendors and admins land on their own dashboards
-  if (profile?.role === "vendor") redirect("/vendor");
-  if (profile?.role === "admin") redirect("/admin");
+  // Vendors and admins can still view the public marketplace — we just
+  // surface a banner pointing them to their dashboard (no hard redirect).
+  const dashboard =
+    profile?.role === "vendor"
+      ? { href: "/vendor", label: "Go to your storefront" }
+      : profile?.role === "admin"
+      ? { href: "/admin", label: "Go to admin console" }
+      : null;
 
   const societyId = await getActiveSocietyId();
   const supabase = createClient();
@@ -103,7 +107,13 @@ export default async function LandingPage() {
       <header className="px-5 py-4 flex items-center justify-between max-w-6xl mx-auto">
         <Logo size="md" />
         <div className="flex items-center gap-2">
-          {profile ? (
+          {dashboard ? (
+            <Link href={dashboard.href}>
+              <Button variant="primary" size="sm">
+                {dashboard.label}
+              </Button>
+            </Link>
+          ) : profile ? (
             <span className="text-sm text-ink-muted hidden sm:inline">
               {profile.full_name?.split(" ")[0] ?? "You"}
             </span>
@@ -129,6 +139,24 @@ export default async function LandingPage() {
           )}
         </div>
       </header>
+
+      {dashboard ? (
+        <div className="px-5 max-w-6xl mx-auto">
+          <Link
+            href={dashboard.href}
+            className="flex items-center justify-between gap-3 rounded-lg border border-brand/20 bg-brand-tint px-4 py-2.5 text-sm text-brand-dark hover:bg-brand-tint/70 transition"
+          >
+            <span>
+              You&apos;re signed in as{" "}
+              <strong>{profile?.role}</strong> — this is the public marketplace.
+            </span>
+            <span className="flex items-center gap-1 font-medium shrink-0">
+              {dashboard.label}
+              <ArrowRight className="h-3.5 w-3.5" />
+            </span>
+          </Link>
+        </div>
+      ) : null}
 
       {/* Hero with chat */}
       <section className="px-5 pt-2 pb-8 max-w-6xl mx-auto">
