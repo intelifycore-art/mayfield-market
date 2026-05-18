@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import { Star, Languages, Phone, ShieldCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth";
@@ -50,20 +49,8 @@ export default async function MaidProfilePage({
       <div className="px-5 py-5 space-y-4 mb-10">
         <Card>
           <CardContent className="p-4 flex items-center gap-4">
-            <div className="relative h-20 w-20 rounded-full overflow-hidden bg-bg-subtle shrink-0">
-              {maid.photo_url ? (
-                <Image
-                  src={maid.photo_url}
-                  alt={maid.full_name}
-                  fill
-                  className="object-cover"
-                  sizes="80px"
-                />
-              ) : (
-                <div className="absolute inset-0 grid place-items-center text-ink-faint text-2xl font-medium">
-                  {maid.full_name.charAt(0)}
-                </div>
-              )}
+            <div className="h-16 w-16 rounded-full bg-brand-tint text-brand-dark grid place-items-center shrink-0 text-xl font-semibold">
+              {maid.full_name.charAt(0).toUpperCase()}
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">

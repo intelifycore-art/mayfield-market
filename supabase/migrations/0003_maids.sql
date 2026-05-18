@@ -1,9 +1,9 @@
 -- =============================================================================
 -- 0003_maids.sql
 -- RWA-run domestic-staff registry for C-Block, Mayfield Gardens.
---   household_services  — the RWA's official rate card / job catalog
---   maids               — registered domestic staff (18+, status, entry pass)
---   maid_services       — which jobs each maid does (+ her quoted rate)
+--   household_services  - the RWA's official rate card / job catalog
+--   maids               - registered domestic staff (18+, status, entry pass)
+--   maid_services       - which jobs each maid does (+ her quoted rate)
 -- Plus bookings can now reference a maid + household service directly.
 -- Safe to run multiple times.
 -- =============================================================================
@@ -11,7 +11,7 @@
 create extension if not exists "pgcrypto";
 
 -- ---------------------------------------------------------------------------
--- household_services — official RWA rate card (also the bookable job list)
+-- household_services - official RWA rate card (also the bookable job list)
 -- ---------------------------------------------------------------------------
 create table if not exists public.household_services (
   id          uuid primary key default gen_random_uuid(),
@@ -32,7 +32,7 @@ create table if not exists public.household_services (
 create index if not exists hs_society_idx on public.household_services(society_id);
 
 -- ---------------------------------------------------------------------------
--- maids — RWA staff registry
+-- maids - RWA staff registry
 -- ---------------------------------------------------------------------------
 do $$ begin
   create type maid_status as enum ('active', 'blacklisted', 'inactive');
@@ -59,7 +59,7 @@ create index if not exists maids_society_idx on public.maids(society_id);
 create index if not exists maids_status_idx on public.maids(status);
 
 -- ---------------------------------------------------------------------------
--- maid_services — many-to-many (which jobs a maid does, + her rate)
+-- maid_services - many-to-many (which jobs a maid does, + her rate)
 -- ---------------------------------------------------------------------------
 create table if not exists public.maid_services (
   maid_id              uuid not null references public.maids(id) on delete cascade,
@@ -115,32 +115,32 @@ create policy ms_admin on public.maid_services for all
   using (current_role_is('admin')) with check (current_role_is('admin'));
 
 -- =============================================================================
--- SEED — official RWA rate card for C-Block, Mayfield Gardens
+-- SEED - official RWA rate card for C-Block, Mayfield Gardens
 -- =============================================================================
 do $$
 declare soc uuid;
 begin
   select id into soc from public.societies where slug = 'mayfield-c-block';
   if soc is null then
-    raise notice 'Society mayfield-c-block not found — run seed.sql first';
+    raise notice 'Society mayfield-c-block not found - run seed.sql first';
     return;
   end if;
 
   insert into public.household_services
     (society_id, slug, title, description, rate_min, rate_max, rate_unit, grp, sort_order)
   values
-    (soc,'sweep-mop-2bhk','Sweeping & mopping — 2 BHK','Inclusive of balconies and the staircase in front of the house.',1000,1500,'month','cleaning',10),
-    (soc,'sweep-mop-3bhk','Sweeping & mopping — 3 BHK','Inclusive of balconies and the staircase in front of the house.',1500,2000,'month','cleaning',11),
-    (soc,'sweep-mop-4bhk','Sweeping & mopping — 4 BHK','Inclusive of balconies and the staircase in front of the house.',2000,2500,'month','cleaning',12),
-    (soc,'utensils','Utensil cleaning (twice a day)','For a family of 3–4 members. More members on pro-rata basis.',1200,1500,'month','kitchen',20),
+    (soc,'sweep-mop-2bhk','Sweeping & mopping - 2 BHK','Inclusive of balconies and the staircase in front of the house.',1000,1500,'month','cleaning',10),
+    (soc,'sweep-mop-3bhk','Sweeping & mopping - 3 BHK','Inclusive of balconies and the staircase in front of the house.',1500,2000,'month','cleaning',11),
+    (soc,'sweep-mop-4bhk','Sweeping & mopping - 4 BHK','Inclusive of balconies and the staircase in front of the house.',2000,2500,'month','cleaning',12),
+    (soc,'utensils','Utensil cleaning (twice a day)','For a family of 3-4 members. More members on pro-rata basis.',1200,1500,'month','kitchen',20),
     (soc,'dusting','Dusting (1 hour daily)','Full-house dusting, about an hour each day.',1500,1500,'month','cleaning',30),
     (soc,'laundry','Clothes washing + dry & fold','Machine wash, drying, folding.',500,500,'month','cleaning',40),
     (soc,'kitchen-prep','Kitchen preparation','Daily kitchen prep / chopping support.',1000,1000,'month','kitchen',50),
     (soc,'bathroom','Bathroom cleaning','WC, basin, mirror, floor. Rate is per bathroom.',250,250,'per bathroom / month','cleaning',60),
     (soc,'cook','Cook (3 meals)','Breakfast, lunch and dinner for a family of 4.',5500,5500,'month','kitchen',70),
-    (soc,'fulltime-8','Full-time maid — 8 hours','8 hours a day.',8000,8000,'month','fulltime',80),
-    (soc,'fulltime-10','Full-time maid — 10 hours','10 hours a day.',10000,10000,'month','fulltime',81),
-    (soc,'fulltime-12','Full-time maid — 12 hours','12 hours a day.',12000,12000,'month','fulltime',82)
+    (soc,'fulltime-8','Full-time maid - 8 hours','8 hours a day.',8000,8000,'month','fulltime',80),
+    (soc,'fulltime-10','Full-time maid - 10 hours','10 hours a day.',10000,10000,'month','fulltime',81),
+    (soc,'fulltime-12','Full-time maid - 12 hours','12 hours a day.',12000,12000,'month','fulltime',82)
   on conflict (society_id, slug) do update set
     title = excluded.title, description = excluded.description,
     rate_min = excluded.rate_min, rate_max = excluded.rate_max,
@@ -151,14 +151,14 @@ begin
   insert into public.maids
     (society_id, full_name, age, phone, photo_url, languages, experience_years, about, status)
   values
-    (soc,'Sunita Devi',34,'9810000011','https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&q=80','Hindi, Bengali',9,'Works in 6 flats in C-Block. Punctual, very thorough with mopping.','active'),
-    (soc,'Lakshmi R',29,'9810000012','https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=300&q=80','Hindi, Tamil',5,'Specialises in kitchen + utensils. Available mornings.','active'),
+    (soc,'Sunita Devi',34,'9810000011',null,'Hindi, Bengali',9,'Works in 6 flats in C-Block. Punctual, very thorough with mopping.','active'),
+    (soc,'Lakshmi R',29,'9810000012',null,'Hindi, Tamil',5,'Specialises in kitchen + utensils. Available mornings.','active'),
     (soc,'Reena Kumari',41,'9810000013',null,'Hindi',15,'Senior help, can run a full household. Trusted by 4 families.','active'),
-    (soc,'Anjali S',23,'9810000014','https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=300&q=80','Hindi, English',3,'Younger, energetic. Good for full-time 8–10 hr roles.','active'),
-    (soc,'Meena Kumari',38,'9810000015','https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&q=80','Hindi',11,'Reliable all-rounder. Sweeping, utensils and bathrooms. Works towers T-1 to T-4.','active'),
-    (soc,'Pushpa Devi',45,'9810000016',null,'Hindi, Punjabi',18,'Excellent cook — North Indian home food. Also does kitchen prep and utensils.','active'),
-    (soc,'Geeta S',27,'9810000017','https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=300&q=80','Hindi',4,'Laundry and dusting specialist. Quick and tidy. Afternoons free.','active'),
-    (soc,'Kavita R',31,'9810000018','https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&q=80','Hindi, Marathi',7,'Full-time help, lived-in experience. Sweeping, mopping and dusting for big homes.','active')
+    (soc,'Anjali S',23,'9810000014',null,'Hindi, English',3,'Younger, energetic. Good for full-time 8-10 hr roles.','active'),
+    (soc,'Meena Kumari',38,'9810000015',null,'Hindi',11,'Reliable all-rounder. Sweeping, utensils and bathrooms. Works towers T-1 to T-4.','active'),
+    (soc,'Pushpa Devi',45,'9810000016',null,'Hindi, Punjabi',18,'Excellent cook - North Indian home food. Also does kitchen prep and utensils.','active'),
+    (soc,'Geeta S',27,'9810000017',null,'Hindi',4,'Laundry and dusting specialist. Quick and tidy. Afternoons free.','active'),
+    (soc,'Kavita R',31,'9810000018',null,'Hindi, Marathi',7,'Full-time help, lived-in experience. Sweeping, mopping and dusting for big homes.','active')
   on conflict (society_id, phone) do update set
     full_name = excluded.full_name, age = excluded.age,
     photo_url = excluded.photo_url, languages = excluded.languages,

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { ChevronDown, ShieldCheck, Star, Languages } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
@@ -188,20 +187,8 @@ export function MaidsBrowser({
                 <Link key={m.id} href={`/maids/${m.id}`}>
                   <Card className="hover:border-ink/20 transition">
                     <CardContent className="p-3 flex items-center gap-3">
-                      <div className="relative h-14 w-14 rounded-full overflow-hidden bg-bg-subtle shrink-0">
-                        {m.photo_url ? (
-                          <Image
-                            src={m.photo_url}
-                            alt={m.full_name}
-                            fill
-                            className="object-cover"
-                            sizes="56px"
-                          />
-                        ) : (
-                          <div className="absolute inset-0 grid place-items-center text-ink-faint text-sm font-medium">
-                            {m.full_name.charAt(0)}
-                          </div>
-                        )}
+                      <div className="h-12 w-12 rounded-full bg-brand-tint text-brand-dark grid place-items-center shrink-0 text-base font-semibold">
+                        {m.full_name.charAt(0).toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
