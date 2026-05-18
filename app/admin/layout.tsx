@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getCurrentProfile } from "@/lib/auth";
 import { AdminNav } from "@/components/admin/nav";
 import { Logo } from "@/components/brand/logo";
+import { SignOutButton } from "@/components/sign-out-button";
 import { fullSocietyName } from "@/lib/society";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -17,9 +18,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <Link href="/admin">
             <Logo size="sm" />
           </Link>
-          <div className="text-right min-w-0">
-            <p className="text-2xs uppercase tracking-wider text-ink-soft">Admin</p>
-            <p className="text-sm font-medium leading-tight truncate">{fullSocietyName()}</p>
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="text-right min-w-0">
+              <p className="text-2xs uppercase tracking-wider text-ink-soft">Admin</p>
+              <p className="text-sm font-medium leading-tight truncate">
+                {fullSocietyName()}
+              </p>
+            </div>
+            <SignOutButton />
           </div>
         </div>
         <AdminNav />

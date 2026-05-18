@@ -4,6 +4,7 @@ import { getCurrentProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { VendorNav } from "@/components/vendor/nav";
 import { Logo } from "@/components/brand/logo";
+import { SignOutButton } from "@/components/sign-out-button";
 
 export default async function VendorLayout({ children }: { children: React.ReactNode }) {
   const profile = await getCurrentProfile();
@@ -27,16 +28,23 @@ export default async function VendorLayout({ children }: { children: React.React
           <Link href="/vendor">
             <Logo size="sm" />
           </Link>
-          {vendor ? (
-            <div className="text-right min-w-0">
-              <p className="text-sm font-medium leading-tight truncate">
-                {vendor.business_name}
-              </p>
-              <p className="text-2xs uppercase tracking-wider text-ink-soft mt-0.5">
-                {vendor.status}
-              </p>
-            </div>
-          ) : null}
+          <div className="flex items-center gap-3 min-w-0">
+            {vendor ? (
+              <div className="text-right min-w-0">
+                <p className="text-sm font-medium leading-tight truncate">
+                  {vendor.business_name}
+                </p>
+                <p className="text-2xs uppercase tracking-wider text-ink-soft mt-0.5">
+                  {vendor.status}
+                </p>
+              </div>
+            ) : (
+              <span className="text-sm text-ink-muted truncate">
+                {profile.full_name ?? "Vendor"}
+              </span>
+            )}
+            <SignOutButton />
+          </div>
         </div>
         {vendor ? <VendorNav /> : null}
       </header>
