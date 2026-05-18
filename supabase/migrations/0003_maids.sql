@@ -154,7 +154,11 @@ begin
     (soc,'Sunita Devi',34,'9810000011','https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&q=80','Hindi, Bengali',9,'Works in 6 flats in C-Block. Punctual, very thorough with mopping.','active'),
     (soc,'Lakshmi R',29,'9810000012','https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=300&q=80','Hindi, Tamil',5,'Specialises in kitchen + utensils. Available mornings.','active'),
     (soc,'Reena Kumari',41,'9810000013',null,'Hindi',15,'Senior help, can run a full household. Trusted by 4 families.','active'),
-    (soc,'Anjali S',23,'9810000014','https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=300&q=80','Hindi, English',3,'Younger, energetic. Good for full-time 8–10 hr roles.','active')
+    (soc,'Anjali S',23,'9810000014','https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=300&q=80','Hindi, English',3,'Younger, energetic. Good for full-time 8–10 hr roles.','active'),
+    (soc,'Meena Kumari',38,'9810000015','https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&q=80','Hindi',11,'Reliable all-rounder. Sweeping, utensils and bathrooms. Works towers T-1 to T-4.','active'),
+    (soc,'Pushpa Devi',45,'9810000016',null,'Hindi, Punjabi',18,'Excellent cook — North Indian home food. Also does kitchen prep and utensils.','active'),
+    (soc,'Geeta S',27,'9810000017','https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=300&q=80','Hindi',4,'Laundry and dusting specialist. Quick and tidy. Afternoons free.','active'),
+    (soc,'Kavita R',31,'9810000018','https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&q=80','Hindi, Marathi',7,'Full-time help, lived-in experience. Sweeping, mopping and dusting for big homes.','active')
   on conflict (society_id, phone) do update set
     full_name = excluded.full_name, age = excluded.age,
     photo_url = excluded.photo_url, languages = excluded.languages,
@@ -193,5 +197,39 @@ begin
   from public.maids m, public.household_services h
   where m.society_id = soc and m.phone = '9810000014'
     and h.society_id = soc and h.slug in ('fulltime-8','fulltime-10','laundry')
+  on conflict do nothing;
+
+  -- Meena: sweep/mop 2-3 bhk, utensils, bathroom
+  insert into public.maid_services (maid_id, household_service_id, rate)
+  select m.id, h.id, null
+  from public.maids m, public.household_services h
+  where m.society_id = soc and m.phone = '9810000015'
+    and h.society_id = soc
+    and h.slug in ('sweep-mop-2bhk','sweep-mop-3bhk','utensils','bathroom')
+  on conflict do nothing;
+
+  -- Pushpa: cook, kitchen-prep, utensils
+  insert into public.maid_services (maid_id, household_service_id, rate)
+  select m.id, h.id, null
+  from public.maids m, public.household_services h
+  where m.society_id = soc and m.phone = '9810000016'
+    and h.society_id = soc and h.slug in ('cook','kitchen-prep','utensils')
+  on conflict do nothing;
+
+  -- Geeta: laundry, dusting, sweep/mop 2bhk
+  insert into public.maid_services (maid_id, household_service_id, rate)
+  select m.id, h.id, null
+  from public.maids m, public.household_services h
+  where m.society_id = soc and m.phone = '9810000017'
+    and h.society_id = soc and h.slug in ('laundry','dusting','sweep-mop-2bhk')
+  on conflict do nothing;
+
+  -- Kavita: full-time 8/10, sweep/mop 4bhk, dusting
+  insert into public.maid_services (maid_id, household_service_id, rate)
+  select m.id, h.id, null
+  from public.maids m, public.household_services h
+  where m.society_id = soc and m.phone = '9810000018'
+    and h.society_id = soc
+    and h.slug in ('fulltime-8','fulltime-10','sweep-mop-4bhk','dusting')
   on conflict do nothing;
 end $$;
