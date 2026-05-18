@@ -9,7 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Rupees } from "@/components/ui/rupees";
 import { Button } from "@/components/ui/button";
 import { Empty } from "@/components/ui/empty";
-import { CalendarPlus, Wrench } from "lucide-react";
+import { CalendarPlus, Wrench, ChevronRight } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -66,13 +66,30 @@ export default async function ServicesPage({
       </section>
 
       <section className="px-5 mt-6">
+        <Link
+          href="/maids"
+          className="flex items-center justify-between gap-3 rounded-lg border border-brand/20 bg-brand-tint px-4 py-3 hover:bg-brand-tint/70 transition"
+        >
+          <div>
+            <p className="text-sm font-semibold text-brand-dark">
+              Maids &amp; house help — RWA rates
+            </p>
+            <p className="text-xs text-brand-dark/80">
+              Official fixed rate card · verified staff you can request
+            </p>
+          </div>
+          <ChevronRight className="h-4 w-4 text-brand-dark shrink-0" />
+        </Link>
+      </section>
+
+      <section className="px-5 mt-6">
         <h2 className="display text-base font-semibold mb-3">Browse by type</h2>
         <div className="grid grid-cols-4 gap-2">
           {(cats ?? []).map((c) => (
             <CategoryTile
               key={c.id}
               category={c}
-              href={`/services?cat=${c.slug}`}
+              href={c.slug === "maids" ? "/maids" : `/services?cat=${c.slug}`}
               size="sm"
             />
           ))}

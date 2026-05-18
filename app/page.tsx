@@ -267,12 +267,33 @@ export default async function LandingPage() {
         </section>
       ) : null}
 
+      {/* Maids highlight */}
+      <section className="px-5 pt-8 max-w-6xl mx-auto">
+        <Link
+          href="/maids"
+          className="flex items-center justify-between gap-3 rounded-xl border border-brand/20 bg-brand-tint px-5 py-4 hover:bg-brand-tint/70 transition"
+        >
+          <div className="min-w-0">
+            <p className="text-2xs uppercase tracking-wider text-brand-dark/70">
+              RWA-managed
+            </p>
+            <p className="display text-lg font-semibold text-brand-dark mt-0.5">
+              Maids &amp; house help
+            </p>
+            <p className="text-xs text-brand-dark/80 mt-0.5">
+              Official fixed rate card · verified staff · request a trial
+            </p>
+          </div>
+          <ChevronRight className="h-5 w-5 text-brand-dark shrink-0" />
+        </Link>
+      </section>
+
       {/* Services */}
       {hasServices ? (
         <section className="px-5 py-8 max-w-6xl mx-auto">
           <SectionHeading
             title="Help when you need it"
-            subtitle="Maids, plumbers, tutors and more — trusted by your neighbors"
+            subtitle="Plumbers, tutors, salon-at-home and more — trusted by your neighbors"
             link={{ href: "/services", label: "All services" }}
           />
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">

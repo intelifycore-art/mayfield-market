@@ -18,6 +18,44 @@ export type BookingStatus =
   | "in_progress"
   | "completed"
   | "cancelled";
+export type MaidStatus = "active" | "blacklisted" | "inactive";
+
+export interface HouseholdService {
+  id: string;
+  society_id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  rate_min: number | null;
+  rate_max: number | null;
+  rate_unit: string;
+  grp: string;
+  sort_order: number;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface Maid {
+  id: string;
+  society_id: string;
+  full_name: string;
+  age: number;
+  phone: string | null;
+  photo_url: string | null;
+  languages: string | null;
+  experience_years: number;
+  about: string | null;
+  status: MaidStatus;
+  entry_pass_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MaidService {
+  maid_id: string;
+  household_service_id: string;
+  rate: number | null;
+}
 
 export interface Society {
   id: string;

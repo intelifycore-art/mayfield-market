@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { Scale, ChevronRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveSocietyId } from "@/lib/society-server";
 import { CategoryTile } from "@/components/resident/category-tile";
@@ -41,6 +43,26 @@ export default async function BrowsePage() {
           emptyPrompt="Try one of these:"
           suggestions={PRODUCT_CHAT_SUGGESTIONS}
         />
+      </section>
+
+      <section className="px-5 mt-4">
+        <Link
+          href="/compare"
+          className="flex items-center justify-between gap-3 rounded-lg border border-line bg-white px-4 py-3 hover:border-ink/20 transition"
+        >
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-md bg-brand-tint text-brand-dark grid place-items-center shrink-0">
+              <Scale className="h-4 w-4" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold">Compare prices</p>
+              <p className="text-xs text-ink-soft">
+                Same item across every vendor — find the cheapest
+              </p>
+            </div>
+          </div>
+          <ChevronRight className="h-4 w-4 text-ink-soft shrink-0" />
+        </Link>
       </section>
 
       <section className="px-5 mt-6">
