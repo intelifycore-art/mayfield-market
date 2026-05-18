@@ -11,9 +11,9 @@ const DEV_PASSWORD = "mayfield-dev-2026";
 const DEV_ACCOUNTS = [
   { role: "admin", email: "dev-admin@mayfield.local", label: "Admin" },
   { role: "vendor", email: "dev-vendor1@mayfield.local", label: "Vendor (Sharma's Mandi)" },
-  { role: "vendor", email: "dev-vendor2@mayfield.local", label: "Vendor (Sparkle Clean)" },
-  { role: "vendor", email: "dev-vendor3@mayfield.local", label: "Vendor (Anita Didi · maid)" },
-  { role: "vendor", email: "dev-vendor4@mayfield.local", label: "Vendor (QuickClean Maids)" },
+  { role: "vendor", email: "dev-vendor2@mayfield.local", label: "Vendor (Rajesh Plumbing)" },
+  { role: "vendor", email: "dev-vendor3@mayfield.local", label: "Vendor (Verma Electricals)" },
+  { role: "vendor", email: "dev-vendor4@mayfield.local", label: "Vendor (Bright Minds Tuition)" },
   { role: "resident", email: "dev-resident@mayfield.local", label: "Resident" },
 ];
 

@@ -129,39 +129,40 @@ const ACCOUNTS: DevAccount[] = [
   {
     email: "dev-vendor2@mayfield.local",
     role: "vendor",
-    full_name: "Sparkle Clean Services",
+    full_name: "Rajesh Kumar",
     phone: "9999900004",
     vendor: {
-      business_name: "Sparkle Clean",
-      tagline: "Trained, verified house help — by the visit or monthly",
+      business_name: "Rajesh Plumbing",
+      tagline: "On-call plumber · 12 years in Sector 50",
       description:
-        "RWA-approved cleaning, dish-wash, and laundry help. Background-checked staff. Same person every visit if you book monthly.",
+        "Leaks, blockages, fittings, geyser and tank work. Same-day response within C-Block. Charges quoted before work starts.",
       photo_url:
-        "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&q=80",
+        "https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?w=400&q=80",
       contact_phone: "9999900004",
       whatsapp_phone: "9999900004",
-      category_slugs: ["home-cleaning"],
+      delivery_note: "Same-day · 8am–8pm",
+      category_slugs: ["plumber"],
       services: [
         {
-          name: "Daily housekeeping (1 hour)",
-          description: "Sweep, mop, dust, dish-wash. Same time each day.",
-          starting_price: 3500,
-          pricing_unit: "monthly",
-          category_slug: "home-cleaning",
+          name: "Tap / leak repair",
+          description: "Dripping taps, pipe leaks, washer replacement.",
+          starting_price: 250,
+          pricing_unit: "visit",
+          category_slug: "plumber",
         },
         {
-          name: "Deep cleaning (one-time)",
-          description: "Full apartment, including kitchen + bathrooms. 4-6 hours.",
-          starting_price: 1800,
+          name: "Drain / blockage clearing",
+          description: "Kitchen, bathroom or balcony drain unclogging.",
+          starting_price: 400,
           pricing_unit: "visit",
-          category_slug: "home-cleaning",
+          category_slug: "plumber",
         },
         {
-          name: "Bathroom-only deep clean",
-          description: "Scale, grout, fittings. One bathroom.",
-          starting_price: 450,
+          name: "Geyser / tank fitting",
+          description: "Install or service geyser, overhead tank, motor.",
+          starting_price: 600,
           pricing_unit: "visit",
-          category_slug: "home-cleaning",
+          category_slug: "plumber",
         },
       ],
     },
@@ -169,42 +170,40 @@ const ACCOUNTS: DevAccount[] = [
   {
     email: "dev-vendor3@mayfield.local",
     role: "vendor",
-    full_name: "Anita Devi",
+    full_name: "Verma Electricals",
     phone: "9999900005",
     vendor: {
-      business_name: "Anita Didi",
-      tagline: "Trusted daily maid · 6 years in Mayfield",
+      business_name: "Verma Electricals",
+      tagline: "Licensed electrician · wiring, repairs, appliances",
       description:
-        "Single-person daily housekeeping. Reliable, soft-spoken, knows the block well. Speaks Hindi + basic English. References available from 5 flats in C-Block.",
+        "Switchboards, fans, lights, inverter and MCB work. Licensed and RWA-listed. Free inspection before quoting.",
       photo_url:
-        "https://images.unsplash.com/photo-1532375810709-75b1da00537c?w=400&q=80",
+        "https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=400&q=80",
       contact_phone: "9999900005",
       whatsapp_phone: "9999900005",
-      delivery_note: "Available 7am-7pm. Two slots a day max.",
-      category_slugs: ["maids", "home-cleaning"],
+      delivery_note: "Same-day · 9am–7pm",
+      category_slugs: ["electrician"],
       services: [
         {
-          name: "Daily housekeeping (1.5 hours)",
-          description:
-            "Sweep, mop, dust, dishes. Mon-Sat, one visit a day, same time.",
-          starting_price: 4500,
-          pricing_unit: "month",
-          category_slug: "maids",
+          name: "Switch / socket / fan repair",
+          description: "Faulty switches, sockets, ceiling/exhaust fans.",
+          starting_price: 200,
+          pricing_unit: "visit",
+          category_slug: "electrician",
         },
         {
-          name: "Daily housekeeping (2 hours)",
-          description: "Above + bathroom clean + laundry folding. Mon-Sat.",
-          starting_price: 6000,
-          pricing_unit: "month",
-          category_slug: "maids",
+          name: "Light / fixture installation",
+          description: "Install lights, chandeliers, LED panels.",
+          starting_price: 350,
+          pricing_unit: "visit",
+          category_slug: "electrician",
         },
         {
-          name: "Cook + clean combo (3 hours)",
-          description:
-            "Daily housekeeping plus one-meal cooking (you provide groceries). North Indian, vegetarian by default.",
-          starting_price: 8500,
-          pricing_unit: "month",
-          category_slug: "maids",
+          name: "Inverter / MCB work",
+          description: "Inverter setup, battery, MCB and wiring faults.",
+          starting_price: 500,
+          pricing_unit: "visit",
+          category_slug: "electrician",
         },
       ],
     },
@@ -212,43 +211,40 @@ const ACCOUNTS: DevAccount[] = [
   {
     email: "dev-vendor4@mayfield.local",
     role: "vendor",
-    full_name: "QuickClean Maids Service",
+    full_name: "Bright Minds Tuition",
     phone: "9999900006",
     vendor: {
-      business_name: "QuickClean Maids",
-      tagline: "On-demand maids · book by the visit or weekly",
+      business_name: "Bright Minds Tuition",
+      tagline: "Home tuition · Classes 1–10 · all boards",
       description:
-        "Pool of 12 trained, verified maids. Same maid on each repeat visit. Pay per visit — no monthly contract. Background-checked, RWA-listed.",
+        "Experienced tutors for Maths, Science and English. At-home or group sessions inside C-Block. First class free.",
       photo_url:
-        "https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=400&q=80",
+        "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400&q=80",
       contact_phone: "9999900006",
       whatsapp_phone: "9999900006",
-      delivery_note: "30 min response · Mon-Sun · 7am to 9pm",
-      category_slugs: ["maids", "home-cleaning"],
+      delivery_note: "Eve slots · Mon–Sat",
+      category_slugs: ["tuition-classes"],
       services: [
         {
-          name: "Single visit (2 hours)",
-          description:
-            "One-off cleaning. Tell us when, we send the nearest available maid.",
-          starting_price: 399,
-          pricing_unit: "visit",
-          category_slug: "maids",
-        },
-        {
-          name: "Weekly visit (4 hours)",
-          description:
-            "One thorough cleaning per week. Same maid each time. 4 visits / month.",
-          starting_price: 2400,
+          name: "Primary tuition (Class 1–5)",
+          description: "All subjects, 1 hour daily, at your flat.",
+          starting_price: 3000,
           pricing_unit: "month",
-          category_slug: "maids",
+          category_slug: "tuition-classes",
         },
         {
-          name: "Move-in / move-out clean",
-          description:
-            "Empty-apartment deep clean. 4-6 hours, 2 maids. Cabinets, fans, fittings.",
-          starting_price: 2800,
-          pricing_unit: "visit",
-          category_slug: "maids",
+          name: "Middle school (Class 6–8)",
+          description: "Maths, Science, English. 1.5 hours, 5 days/week.",
+          starting_price: 4500,
+          pricing_unit: "month",
+          category_slug: "tuition-classes",
+        },
+        {
+          name: "Class 9–10 (board prep)",
+          description: "Focused board preparation with weekly tests.",
+          starting_price: 6000,
+          pricing_unit: "month",
+          category_slug: "tuition-classes",
         },
       ],
     },
@@ -350,14 +346,16 @@ export async function POST() {
       }
       const vendorId = vRows.id;
 
-      // Vendor-categories
+      // Vendor-categories — clear and re-insert (idempotent; prevents a
+      // repurposed demo vendor from lingering under its old category)
+      await admin.from("vendor_categories").delete().eq("vendor_id", vendorId);
       const catIds = acc.vendor.category_slugs
         .map((s) => catBySlug.get(s))
         .filter(Boolean) as string[];
       if (catIds.length) {
         await admin
           .from("vendor_categories")
-          .upsert(catIds.map((cid) => ({ vendor_id: vendorId, category_id: cid })));
+          .insert(catIds.map((cid) => ({ vendor_id: vendorId, category_id: cid })));
       }
 
       // Listings — clear and re-insert (idempotent)
