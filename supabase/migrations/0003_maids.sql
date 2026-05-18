@@ -161,45 +161,35 @@ begin
     experience_years = excluded.experience_years, about = excluded.about;
 
   -- ---- link demo maids to services -------------------------------------
-  -- Sunita: sweep/mop (all BHK), dusting, bathroom
+  -- rate is left NULL on purpose: the official RWA rate card is the single
+  -- source of truth shown on every card. (Admin may optionally set a
+  -- maid-specific rate later; demos follow the document exactly.)
+
   insert into public.maid_services (maid_id, household_service_id, rate)
-  select m.id, h.id,
-    case h.slug when 'sweep-mop-2bhk' then 1200 when 'sweep-mop-3bhk' then 1800
-                when 'sweep-mop-4bhk' then 2300 when 'dusting' then 1500
-                when 'bathroom' then 250 end
+  select m.id, h.id, null
   from public.maids m, public.household_services h
   where m.society_id = soc and m.phone = '9810000011'
     and h.society_id = soc
     and h.slug in ('sweep-mop-2bhk','sweep-mop-3bhk','sweep-mop-4bhk','dusting','bathroom')
   on conflict do nothing;
 
-  -- Lakshmi: utensils, kitchen-prep, cook
   insert into public.maid_services (maid_id, household_service_id, rate)
-  select m.id, h.id,
-    case h.slug when 'utensils' then 1400 when 'kitchen-prep' then 1000
-                when 'cook' then 5500 end
+  select m.id, h.id, null
   from public.maids m, public.household_services h
   where m.society_id = soc and m.phone = '9810000012'
     and h.society_id = soc and h.slug in ('utensils','kitchen-prep','cook')
   on conflict do nothing;
 
-  -- Reena: full-time 8/10/12, sweep/mop 3-4 bhk
   insert into public.maid_services (maid_id, household_service_id, rate)
-  select m.id, h.id,
-    case h.slug when 'fulltime-8' then 8000 when 'fulltime-10' then 10000
-                when 'fulltime-12' then 12000 when 'sweep-mop-3bhk' then 1900
-                when 'sweep-mop-4bhk' then 2400 end
+  select m.id, h.id, null
   from public.maids m, public.household_services h
   where m.society_id = soc and m.phone = '9810000013'
     and h.society_id = soc
     and h.slug in ('fulltime-8','fulltime-10','fulltime-12','sweep-mop-3bhk','sweep-mop-4bhk')
   on conflict do nothing;
 
-  -- Anjali: full-time 8/10, laundry
   insert into public.maid_services (maid_id, household_service_id, rate)
-  select m.id, h.id,
-    case h.slug when 'fulltime-8' then 8000 when 'fulltime-10' then 10000
-                when 'laundry' then 500 end
+  select m.id, h.id, null
   from public.maids m, public.household_services h
   where m.society_id = soc and m.phone = '9810000014'
     and h.society_id = soc and h.slug in ('fulltime-8','fulltime-10','laundry')

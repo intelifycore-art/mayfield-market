@@ -7,7 +7,7 @@ import { getActiveSocietyId } from "@/lib/society-server";
 import { PageHeader } from "@/components/resident/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Rupees } from "@/components/ui/rupees";
+import { householdRateLabel } from "@/lib/policy";
 import { RequestMaid } from "./request-form";
 import type { HouseholdService } from "@/lib/types";
 
@@ -116,17 +116,8 @@ export default async function MaidProfilePage({
                       </p>
                     ) : null}
                   </div>
-                  <p className="tabular text-right shrink-0 whitespace-nowrap text-sm">
-                    {j.rate != null ? (
-                      <Rupees amount={j.rate} size="sm" className="text-ink" />
-                    ) : j.svc.rate_min != null ? (
-                      <Rupees amount={j.svc.rate_min} size="sm" className="text-ink" />
-                    ) : (
-                      "On request"
-                    )}
-                    <span className="text-2xs text-ink-soft block">
-                      /{j.svc.rate_unit}
-                    </span>
+                  <p className="tabular text-right shrink-0 whitespace-nowrap text-sm font-medium">
+                    {householdRateLabel(j.svc)}
                   </p>
                 </CardContent>
               </Card>

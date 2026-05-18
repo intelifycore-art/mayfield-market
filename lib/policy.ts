@@ -1,4 +1,22 @@
 import { fullSocietyName } from "@/lib/society";
+import { inr } from "@/lib/format";
+
+/**
+ * Canonical rate label for a household service — the single source of truth
+ * is the RWA rate card, so every card (list, profile, services) renders the
+ * exact figures from the official document via this one helper.
+ */
+export function householdRateLabel(s: {
+  rate_min: number | null;
+  rate_max: number | null;
+  rate_unit: string;
+}): string {
+  if (s.rate_min == null) return "On request";
+  if (s.rate_max != null && s.rate_max !== s.rate_min) {
+    return `${inr(s.rate_min)}–${inr(s.rate_max)} / ${s.rate_unit}`;
+  }
+  return `${inr(s.rate_min)} / ${s.rate_unit}`;
+}
 
 /**
  * Official RWA code of conduct for hired domestic staff in C-Block,

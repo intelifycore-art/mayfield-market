@@ -7,9 +7,11 @@ import { ChatPanel } from "@/components/chat/chat-panel";
 import { SERVICE_CHAT_SUGGESTIONS } from "@/lib/chat";
 import { Card, CardContent } from "@/components/ui/card";
 import { Rupees } from "@/components/ui/rupees";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Empty } from "@/components/ui/empty";
-import { CalendarPlus, Wrench, ChevronRight } from "lucide-react";
+import { inr } from "@/lib/format";
+import { CalendarPlus, Wrench, ChevronRight, Sparkles } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -33,6 +35,24 @@ export default async function ServicesPage({
   if (searchParams.cat) {
     activeCat = (cats ?? []).find((c) => c.slug === searchParams.cat);
     categoryId = activeCat?.id;
+  }
+
+  // RWA household-service rate range (the official document) for the
+  // Maids & House Help summary card.
+  let hhCount = 0;
+  let hhMin: number | null = null;
+  let hhMax: number | null = null;
+  if (societyId) {
+    const { data: hh } = await supabase
+      .from("household_services")
+      .select("rate_min, rate_max")
+      .eq("society_id", societyId)
+      .eq("is_active", true);
+    if (hh && hh.length) {
+      hhCount = hh.length;
+      hhMin = Math.min(...hh.map((x: any) => Number(x.rate_min ?? Infinity)));
+      hhMax = Math.max(...hh.map((x: any) => Number(x.rate_max ?? x.rate_min ?? 0)));
+    }
   }
 
   let services: any[] = [];
@@ -100,12 +120,43 @@ export default async function ServicesPage({
         <h2 className="display text-base font-semibold mb-3">
           {activeCat ? activeCat.name : "All services"}
         </h2>
+
+        {!activeCat && hhCount > 0 ? (
+          <Link href="/maids" className="block mb-2">
+            <Card className="border-brand/25 bg-brand-tint hover:bg-brand-tint/70 transition">
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="h-11 w-11 rounded-lg bg-brand text-white grid place-items-center shrink-0">
+                  <Sparkles className="h-5 w-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="font-semibold text-sm text-brand-dark">
+                      Maids &amp; House Help
+                    </p>
+                    <Badge variant="brand">RWA-fixed rates</Badge>
+                  </div>
+                  <p className="text-xs text-brand-dark/80 mt-0.5">
+                    {hhCount} household jobs ·{" "}
+                    {hhMin != null && hhMax != null
+                      ? `${inr(hhMin)}–${inr(hhMax)} / month`
+                      : "official rate card"}{" "}
+                    · verified staff
+                  </p>
+                </div>
+                <ChevronRight className="h-4 w-4 text-brand-dark shrink-0" />
+              </CardContent>
+            </Card>
+          </Link>
+        ) : null}
+
         {services.length === 0 ? (
-          <Empty
-            icon={<Wrench className="h-8 w-8" />}
-            title="No services yet"
-            description="Try another category or check back soon."
-          />
+          !activeCat && hhCount > 0 ? null : (
+            <Empty
+              icon={<Wrench className="h-8 w-8" />}
+              title="No services yet"
+              description="Try another category or check back soon."
+            />
+          )
         ) : (
           <div className="space-y-2">
             {services.map((s: any) => (
