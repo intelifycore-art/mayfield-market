@@ -21,7 +21,8 @@ import { ChatPanel } from "@/components/chat/chat-panel";
 import { BottomNav } from "@/components/resident/bottom-nav";
 import { OrderStatusBadge } from "@/components/resident/order-status";
 import { Rupees } from "@/components/ui/rupees";
-import { relativeTime } from "@/lib/format";
+import { relativeTime, inr } from "@/lib/format";
+import { householdRateLabel } from "@/lib/policy";
 
 export const dynamic = "force-dynamic";
 
@@ -96,9 +97,34 @@ export default async function LandingPage() {
       : Promise.resolve({ data: [] as any[] }),
   ]);
 
+  // RWA household-service rate card preview (separate query so a missing
+  // migration 0003 doesn't break the rest of the landing).
+  let household: any[] = [];
+  if (societyId) {
+    const { data: hh } = await supabase
+      .from("household_services")
+      .select("slug, title, rate_min, rate_max, rate_unit, grp, sort_order")
+      .eq("society_id", societyId)
+      .eq("is_active", true)
+      .order("sort_order");
+    household = hh ?? [];
+  }
+  const hhMin = household.length
+    ? Math.min(...household.map((h) => Number(h.rate_min ?? Infinity)))
+    : null;
+  const hhMax = household.length
+    ? Math.max(
+        ...household.map((h) => Number(h.rate_max ?? h.rate_min ?? 0)),
+      )
+    : null;
+  const hhPreview = ["sweep-mop-2bhk", "cook", "fulltime-8", "bathroom"]
+    .map((s) => household.find((h) => h.slug === s))
+    .filter(Boolean);
+
   const hasRecent = recentOrders && recentOrders.length > 0;
   const hasListings = listings && listings.length > 0;
   const hasServices = services && services.length > 0;
+  const hasHousehold = household.length > 0;
   const hasVendors = vendors && vendors.length > 0;
 
   return (
@@ -267,46 +293,102 @@ export default async function LandingPage() {
         </section>
       ) : null}
 
-      {/* Maids highlight */}
-      <section className="px-5 pt-8 max-w-6xl mx-auto">
+      {/* Services — Maids & House Help is the hero */}
+      <section className="px-5 py-8 max-w-6xl mx-auto">
+        <SectionHeading
+          title="Services on the block"
+          subtitle="RWA-managed household staff, plus trusted local help"
+          link={{ href: "/services", label: "All services" }}
+        />
+
+        {/* Maids hero */}
         <Link
           href="/maids"
-          className="flex items-center justify-between gap-3 rounded-xl border border-brand/20 bg-brand-tint px-5 py-4 hover:bg-brand-tint/70 transition"
+          className="block rounded-2xl border border-brand/25 bg-brand-tint overflow-hidden hover:border-brand/40 transition group"
         >
-          <div className="min-w-0">
-            <p className="text-2xs uppercase tracking-wider text-brand-dark/70">
-              RWA-managed
-            </p>
-            <p className="display text-lg font-semibold text-brand-dark mt-0.5">
-              Maids &amp; house help
-            </p>
-            <p className="text-xs text-brand-dark/80 mt-0.5">
-              Official fixed rate card · verified staff · request a trial
-            </p>
-          </div>
-          <ChevronRight className="h-5 w-5 text-brand-dark shrink-0" />
-        </Link>
-      </section>
+          <div className="p-5 sm:p-6">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <span className="inline-flex items-center gap-1.5 text-2xs uppercase tracking-wider text-brand-dark/80 bg-white/60 rounded-full px-2.5 py-1">
+                  <ShieldCheck className="h-3 w-3" />
+                  RWA-managed · official fixed rates
+                </span>
+                <h3 className="display text-2xl sm:text-3xl font-semibold text-brand-dark mt-3">
+                  Maids &amp; House Help
+                </h3>
+                <p className="text-sm text-brand-dark/80 mt-1 max-w-lg">
+                  Verified domestic staff at the rates fixed by the C-Block
+                  RWA. Sweeping, cooking, full-time maids and more — request a
+                  trial in a tap.
+                </p>
+              </div>
+              <span className="hidden sm:grid h-10 w-10 rounded-full bg-brand text-white place-items-center shrink-0 group-hover:scale-105 transition">
+                <ArrowRight className="h-5 w-5" />
+              </span>
+            </div>
 
-      {/* Services */}
-      {hasServices ? (
-        <section className="px-5 py-8 max-w-6xl mx-auto">
-          <SectionHeading
-            title="Help when you need it"
-            subtitle="Plumbers, tutors, salon-at-home and more — trusted by your neighbors"
-            link={{ href: "/services", label: "All services" }}
-          />
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
-            {services!.slice(0, 6).map((s: any) => (
-              <ServiceTile
-                key={s.id}
-                service={s}
-                vendorName={s.vendor.business_name}
-              />
-            ))}
+            {hasHousehold ? (
+              <>
+                <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {hhPreview.map((h: any) => (
+                    <div
+                      key={h.slug}
+                      className="rounded-lg bg-white/70 px-3 py-2.5"
+                    >
+                      <p className="text-2xs text-brand-dark/70 leading-tight line-clamp-1">
+                        {h.title}
+                      </p>
+                      <p className="text-sm font-semibold text-brand-dark tabular mt-0.5">
+                        {householdRateLabel(h)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 flex items-center justify-between gap-3">
+                  <p className="text-xs text-brand-dark/80 tabular">
+                    {household.length} household jobs ·{" "}
+                    {hhMin != null && hhMax != null
+                      ? `${inr(hhMin)}–${inr(hhMax)} / month`
+                      : "fixed rate card"}
+                  </p>
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-brand text-white text-sm font-medium px-4 py-2 group-hover:bg-brand-dark transition">
+                    See all rates &amp; staff
+                    <ChevronRight className="h-4 w-4" />
+                  </span>
+                </div>
+              </>
+            ) : (
+              <div className="mt-5 flex items-center justify-between gap-3">
+                <p className="text-xs text-brand-dark/80">
+                  Official rate card · verified staff · request a trial
+                </p>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-brand text-white text-sm font-medium px-4 py-2 group-hover:bg-brand-dark transition">
+                  Open Maids &amp; Help
+                  <ChevronRight className="h-4 w-4" />
+                </span>
+              </div>
+            )}
           </div>
-        </section>
-      ) : null}
+        </Link>
+
+        {/* Other local help */}
+        {hasServices ? (
+          <div className="mt-6">
+            <h3 className="text-sm font-semibold text-ink-muted mb-3">
+              Other help — plumbers, electricians, tutors &amp; more
+            </h3>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
+              {services!.slice(0, 6).map((s: any) => (
+                <ServiceTile
+                  key={s.id}
+                  service={s}
+                  vendorName={s.vendor.business_name}
+                />
+              ))}
+            </div>
+          </div>
+        ) : null}
+      </section>
 
       {/* Vendors */}
       <section id="vendors" className="px-5 py-8 max-w-6xl mx-auto scroll-mt-4">
