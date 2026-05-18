@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { Star, Languages, Phone, ShieldCheck } from "lucide-react";
+import { Star, ShieldCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth";
 import { getActiveSocietyId } from "@/lib/society-server";
@@ -62,17 +62,17 @@ export default async function MaidProfilePage({
                   </Badge>
                 ) : null}
               </div>
-              <p className="text-xs text-ink-soft flex items-center gap-1 mt-1">
-                <Star className="h-3 w-3 fill-warning text-warning" strokeWidth={0} />
-                {maid.experience_years} yr
-                {maid.experience_years === 1 ? "" : "s"} experience
+              <p className="text-xs text-ink-soft flex items-center gap-1.5 mt-1.5">
+                <Star
+                  className="h-3 w-3 fill-warning text-warning shrink-0"
+                  strokeWidth={0}
+                />
+                <span>
+                  {maid.experience_years} yr
+                  {maid.experience_years === 1 ? "" : "s"} experience
+                  {maid.languages ? ` · ${maid.languages}` : ""}
+                </span>
               </p>
-              {maid.languages ? (
-                <p className="text-xs text-ink-soft flex items-center gap-1 mt-0.5">
-                  <Languages className="h-3 w-3" />
-                  {maid.languages}
-                </p>
-              ) : null}
             </div>
           </CardContent>
         </Card>

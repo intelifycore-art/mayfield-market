@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ChevronDown, ShieldCheck, Star, Languages } from "lucide-react";
+import { ChevronDown, ShieldCheck, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -186,8 +186,8 @@ export function MaidsBrowser({
               return (
                 <Link key={m.id} href={`/maids/${m.id}`}>
                   <Card className="hover:border-ink/20 transition">
-                    <CardContent className="p-3 flex items-center gap-3">
-                      <div className="h-12 w-12 rounded-full bg-brand-tint text-brand-dark grid place-items-center shrink-0 text-base font-semibold">
+                    <CardContent className="p-3 flex items-start gap-3">
+                      <div className="h-11 w-11 rounded-full bg-brand-tint text-brand-dark grid place-items-center shrink-0 text-base font-semibold mt-0.5">
                         {m.full_name.charAt(0).toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -197,17 +197,16 @@ export function MaidsBrowser({
                           </p>
                           <Badge variant="default">{m.age} yrs</Badge>
                         </div>
-                        <p className="text-xs text-ink-soft flex items-center gap-1 mt-0.5">
-                          <Star className="h-3 w-3 fill-warning text-warning" strokeWidth={0} />
-                          {m.experience_years} yr
-                          {m.experience_years === 1 ? "" : "s"} experience
-                          {m.languages ? (
-                            <>
-                              <span className="text-ink-faint">·</span>
-                              <Languages className="h-3 w-3" />
-                              {m.languages}
-                            </>
-                          ) : null}
+                        <p className="text-xs text-ink-soft mt-1 flex items-center gap-1.5">
+                          <Star
+                            className="h-3 w-3 fill-warning text-warning shrink-0"
+                            strokeWidth={0}
+                          />
+                          <span className="truncate">
+                            {m.experience_years} yr
+                            {m.experience_years === 1 ? "" : "s"} experience
+                            {m.languages ? ` · ${m.languages}` : ""}
+                          </span>
                         </p>
                         {jobNames.length > 0 ? (
                           <p className="text-2xs text-ink-soft mt-1 truncate">
