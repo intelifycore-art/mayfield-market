@@ -6,12 +6,21 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { toast } from "@/components/ui/toast";
 import { fullSocietyName } from "@/lib/society";
-import { Loader2, ArrowRight, Store } from "lucide-react";
+import { Loader2, ArrowRight, Store, Mail, KeyRound, Sparkles } from "lucide-react";
 
-const COUNTRY = "+91"; // India only for the MVP
+// Demo credentials — provisioned by the dev seed. Visible on the login page
+// for the demo phase; hide by setting NEXT_PUBLIC_SHOW_DEMO_LOGIN=0 in Vercel.
+const DEMO_EMAIL = "demo@mayfield.market";
+const DEMO_PASSWORD = "mayfield2026";
 
 export function LoginForm({
   next,
@@ -22,138 +31,181 @@ export function LoginForm({
 }) {
   const router = useRouter();
   const supabase = createClient();
-  const [step, setStep] = useState<"phone" | "code">("phone");
-  // 10-digit local number; the +91 prefix is added when sending
-  const [local, setLocal] = useState("");
-  const [code, setCode] = useState("");
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
 
   const isVendor = role === "vendor";
-  const fullPhone = COUNTRY + local;
-  const phoneReady = /^\d{10}$/.test(local);
+  const showDemo = process.env.NEXT_PUBLIC_SHOW_DEMO_LOGIN !== "0";
 
-  async function sendCode(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!phoneReady) {
-      toast.error("Enter a 10-digit mobile number");
+    if (!email.trim() || !password) return;
+    setBusy(true);
+
+    if (mode === "signin") {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+      setBusy(false);
+      if (error) {
+        toast.error("Couldn't sign in", error.message);
+        return;
+      }
+      const target = next ?? (isVendor ? "/vendor" : "/");
+      router.replace(target);
+      router.refresh();
       return;
     }
-    setBusy(true);
-    const { error } = await supabase.auth.signInWithOtp({
-      phone: fullPhone,
-      options: { shouldCreateUser: true },
+
+    // signup
+    const { error } = await supabase.auth.signUp({
+      email: email.trim(),
+      password,
     });
     setBusy(false);
     if (error) {
-      toast.error("Couldn't send the code", error.message);
+      toast.error("Couldn't create account", error.message);
       return;
     }
-    toast.success("Code sent", `SMS to ${fullPhone}`);
-    setStep("code");
-  }
-
-  async function verify(e: React.FormEvent) {
-    e.preventDefault();
-    if (code.length < 6) return;
-    setBusy(true);
-    const { error } = await supabase.auth.verifyOtp({
-      phone: fullPhone,
-      token: code,
-      type: "sms",
-    });
-    setBusy(false);
-    if (error) {
-      toast.error("Wrong or expired code", error.message);
-      return;
-    }
-    const target = next ?? (isVendor ? "/vendor" : "/");
-    router.replace(target);
+    toast.success("Account created", "One last step.");
+    router.replace("/onboarding");
     router.refresh();
   }
 
+  function fillDemo() {
+    setEmail(DEMO_EMAIL);
+    setPassword(DEMO_PASSWORD);
+    setMode("signin");
+  }
+
   return (
-    <Card>
-      <CardHeader>
-        {isVendor ? (
-          <>
-            <div className="inline-flex items-center gap-1.5 text-2xs uppercase tracking-wider text-brand-dark bg-brand-tint rounded-full px-2 py-0.5 w-fit mb-1">
-              <Store className="h-3 w-3" />
-              Vendor sign in
-            </div>
-            <CardTitle className="text-2xl display">List your business</CardTitle>
-            <CardDescription>
-              Sign in with your mobile number to manage your storefront at{" "}
-              {fullSocietyName()}. New vendors will be prompted to apply.
-            </CardDescription>
-          </>
-        ) : next ? (
-          <>
-            <CardTitle className="text-2xl display">Sign in to continue</CardTitle>
-            <CardDescription>
-              We need your mobile number so the vendor can reach you for delivery.
-            </CardDescription>
-          </>
-        ) : (
-          <>
-            <CardTitle className="text-2xl display">Welcome to your block</CardTitle>
-            <CardDescription>
-              Sign in with your mobile number to start shopping with vendors in{" "}
-              {fullSocietyName()}.
-            </CardDescription>
-          </>
-        )}
-      </CardHeader>
-      <CardContent className="pt-0 sm:pt-0">
-        {step === "phone" ? (
-          <form onSubmit={sendCode} className="space-y-4">
+    <div className="space-y-3">
+      <Card>
+        <CardHeader>
+          {isVendor ? (
+            <>
+              <div className="inline-flex items-center gap-1.5 text-2xs uppercase tracking-wider text-brand-dark bg-brand-tint rounded-full px-2 py-0.5 w-fit mb-1">
+                <Store className="h-3 w-3" />
+                Vendor sign in
+              </div>
+              <CardTitle className="text-2xl display">List your business</CardTitle>
+              <CardDescription>
+                Sign in to manage your storefront at {fullSocietyName()}. New
+                vendors will be prompted to apply after signing up.
+              </CardDescription>
+            </>
+          ) : next ? (
+            <>
+              <CardTitle className="text-2xl display">Sign in to continue</CardTitle>
+              <CardDescription>
+                Sign in so the vendor can deliver to your flat.
+              </CardDescription>
+            </>
+          ) : (
+            <>
+              <CardTitle className="text-2xl display">Welcome to your block</CardTitle>
+              <CardDescription>
+                {mode === "signin"
+                  ? `Sign in to start shopping with vendors in ${fullSocietyName()}.`
+                  : `Create your account to start shopping in ${fullSocietyName()}.`}
+              </CardDescription>
+            </>
+          )}
+        </CardHeader>
+        <CardContent className="pt-0 sm:pt-0">
+          <form onSubmit={submit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="phone">Mobile number</Label>
-              <div className="flex items-stretch rounded-md border border-line bg-white focus-within:border-brand focus-within:ring-2 focus-within:ring-brand/30">
-                <span className="px-3 grid place-items-center text-sm text-ink-muted bg-bg-subtle border-r border-line rounded-l-md tabular">
-                  {COUNTRY}
-                </span>
+              <Label htmlFor="email">Email</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-faint" />
                 <Input
-                  id="phone"
-                  type="tel"
-                  inputMode="numeric"
-                  autoComplete="tel-national"
+                  id="email"
+                  type="email"
+                  autoComplete="email"
                   required
-                  maxLength={10}
-                  placeholder="9876543210"
-                  className="border-0 focus-visible:ring-0 focus-visible:border-0 rounded-l-none tabular"
-                  value={local}
-                  onChange={(e) =>
-                    setLocal(e.target.value.replace(/\D/g, "").slice(0, 10))
-                  }
+                  placeholder="you@example.com"
+                  className="pl-9"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
-              <p className="text-xs text-ink-soft">
-                We&apos;ll text you a 6-digit code. No password to remember.
-              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
+                <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-faint" />
+                <Input
+                  id="password"
+                  type="password"
+                  autoComplete={
+                    mode === "signin" ? "current-password" : "new-password"
+                  }
+                  required
+                  minLength={mode === "signup" ? 6 : undefined}
+                  placeholder={mode === "signup" ? "at least 6 characters" : "••••••••"}
+                  className="pl-9"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
             </div>
             <Button
               type="submit"
-              disabled={busy || !phoneReady}
+              disabled={busy || !email.trim() || !password}
               className="w-full"
               size="lg"
             >
               {busy ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
+              ) : mode === "signin" ? (
+                <>
+                  Sign in <ArrowRight className="h-4 w-4" />
+                </>
               ) : (
                 <>
-                  Send code <ArrowRight className="h-4 w-4" />
+                  Create account <ArrowRight className="h-4 w-4" />
                 </>
               )}
             </Button>
+
+            <p className="text-center text-xs text-ink-soft">
+              {mode === "signin" ? (
+                <>
+                  New to {fullSocietyName()}?{" "}
+                  <button
+                    type="button"
+                    onClick={() => setMode("signup")}
+                    className="text-brand underline"
+                  >
+                    Create an account
+                  </button>
+                </>
+              ) : (
+                <>
+                  Already have an account?{" "}
+                  <button
+                    type="button"
+                    onClick={() => setMode("signin")}
+                    className="text-brand underline"
+                  >
+                    Sign in
+                  </button>
+                </>
+              )}
+            </p>
+
             {!isVendor ? (
-              <p className="text-center text-xs text-ink-soft">
+              <p className="text-center text-2xs text-ink-soft">
                 Vendor or service provider?{" "}
                 <Link href="/login?role=vendor" className="text-brand underline">
                   Sign in here
                 </Link>
               </p>
             ) : (
-              <p className="text-center text-xs text-ink-soft">
+              <p className="text-center text-2xs text-ink-soft">
                 Looking to shop instead?{" "}
                 <Link href="/login" className="text-brand underline">
                   Resident sign in
@@ -161,47 +213,35 @@ export function LoginForm({
               </p>
             )}
           </form>
-        ) : (
-          <form onSubmit={verify} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="code">6-digit code</Label>
-              <Input
-                id="code"
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                pattern="\d{6}"
-                maxLength={6}
-                required
-                placeholder="123456"
-                className="text-center text-lg tabular tracking-[0.4em]"
-                value={code}
-                onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-              />
-              <p className="text-xs text-ink-soft">
-                Sent to {fullPhone}.{" "}
-                <button
-                  type="button"
-                  className="underline"
-                  onClick={() => {
-                    setStep("phone");
-                    setCode("");
-                  }}
-                >
-                  Use a different number
-                </button>
-              </p>
+        </CardContent>
+      </Card>
+
+      {showDemo ? (
+        <Card className="border-brand/25 bg-brand-tint/50">
+          <CardContent className="p-4 flex items-start gap-3">
+            <div className="h-9 w-9 rounded-md bg-brand text-white grid place-items-center shrink-0">
+              <Sparkles className="h-4 w-4" />
             </div>
-            <Button
-              type="submit"
-              disabled={busy || code.length < 6}
-              className="w-full"
-              size="lg"
-            >
-              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign in"}
-            </Button>
-          </form>
-        )}
-      </CardContent>
-    </Card>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-brand-dark">
+                Try the demo account
+              </p>
+              <p className="text-xs text-brand-dark/80 tabular mt-0.5 break-all">
+                {DEMO_EMAIL} · {DEMO_PASSWORD}
+              </p>
+              <Button
+                type="button"
+                variant="brand"
+                size="sm"
+                className="mt-2"
+                onClick={fillDemo}
+              >
+                Fill demo credentials
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
+    </div>
   );
 }

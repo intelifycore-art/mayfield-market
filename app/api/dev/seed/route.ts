@@ -6,6 +6,8 @@ const DEV_PASSWORD = "mayfield-dev-2026";
 
 interface DevAccount {
   email: string;
+  /** Optional per-account password override; defaults to DEV_PASSWORD. */
+  password?: string;
   role: "admin" | "vendor" | "resident";
   full_name: string;
   flat_no?: string;
@@ -40,6 +42,17 @@ interface DevAccount {
 }
 
 const ACCOUNTS: DevAccount[] = [
+  // Public-facing demo account — referenced by the login page hint card.
+  // Pre-onboarded resident so anyone can sign in and shop immediately.
+  {
+    email: "demo@mayfield.market",
+    password: "mayfield2026",
+    role: "resident",
+    full_name: "Demo Resident",
+    tower: "T-3",
+    flat_no: "1204",
+    phone: "9990000000",
+  },
   {
     email: "dev-admin@mayfield.local",
     role: "admin",
@@ -327,6 +340,7 @@ export async function POST() {
   // 3. For each account
   const created: string[] = [];
   for (const acc of ACCOUNTS) {
+    const password = acc.password ?? DEV_PASSWORD;
     // Look up existing user by email
     const { data: existing } = await admin.auth.admin.listUsers();
     let userId = existing?.users.find((u) => u.email === acc.email)?.id;
@@ -334,7 +348,7 @@ export async function POST() {
     if (!userId) {
       const { data: createRes, error } = await admin.auth.admin.createUser({
         email: acc.email,
-        password: DEV_PASSWORD,
+        password,
         email_confirm: true,
       });
       if (error || !createRes.user) {
@@ -347,7 +361,7 @@ export async function POST() {
       created.push(acc.email);
     } else {
       // Reset password in case it was changed
-      await admin.auth.admin.updateUserById(userId, { password: DEV_PASSWORD });
+      await admin.auth.admin.updateUserById(userId, { password });
     }
 
     // Upsert profile
