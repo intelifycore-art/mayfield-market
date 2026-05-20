@@ -211,40 +211,83 @@ const ACCOUNTS: DevAccount[] = [
   {
     email: "dev-vendor4@mayfield.local",
     role: "vendor",
-    full_name: "Bright Minds Tuition",
+    full_name: "Patel Vegetables",
     phone: "9999900006",
     vendor: {
-      business_name: "Bright Minds Tuition",
-      tagline: "Home tuition · Classes 1–10 · all boards",
+      business_name: "Patel Vegetables",
+      tagline: "Daily veggies and fruits, direct from Sabzi Mandi",
       description:
-        "Experienced tutors for Maths, Science and English. At-home or group sessions inside C-Block. First class free.",
+        "Fresh produce sourced every morning from Khandsa Mandi. Good prices on staples, plus seasonal items.",
       photo_url:
-        "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400&q=80",
+        "https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=400&q=80",
       contact_phone: "9999900006",
       whatsapp_phone: "9999900006",
-      delivery_note: "Eve slots · Mon–Sat",
-      category_slugs: ["tuition-classes"],
-      services: [
+      delivery_note: "Same-day before 7 PM. Free above Rs 250.",
+      category_slugs: ["fruits-vegetables"],
+      listings: [
         {
-          name: "Primary tuition (Class 1–5)",
-          description: "All subjects, 1 hour daily, at your flat.",
-          starting_price: 3000,
-          pricing_unit: "month",
-          category_slug: "tuition-classes",
+          name: "Tomatoes (red, premium)",
+          description: "Mandi pick, slightly larger size.",
+          price: 45,
+          unit: "kg",
+          stock: 40,
+          category_slug: "fruits-vegetables",
         },
         {
-          name: "Middle school (Class 6–8)",
-          description: "Maths, Science, English. 1.5 hours, 5 days/week.",
-          starting_price: 4500,
-          pricing_unit: "month",
-          category_slug: "tuition-classes",
+          name: "Onions (nashik)",
+          description: "Sorted, no bruising.",
+          price: 32,
+          unit: "kg",
+          stock: 80,
+          category_slug: "fruits-vegetables",
         },
         {
-          name: "Class 9–10 (board prep)",
-          description: "Focused board preparation with weekly tests.",
-          starting_price: 6000,
-          pricing_unit: "month",
-          category_slug: "tuition-classes",
+          name: "Potatoes (chipsona)",
+          description: "Big-size chipsona, ideal for fries.",
+          price: 26,
+          unit: "kg",
+          stock: 100,
+          category_slug: "fruits-vegetables",
+        },
+        {
+          name: "Bananas (yelakki)",
+          description: "Ripe, ready to eat.",
+          price: 55,
+          unit: "dozen",
+          stock: 25,
+          category_slug: "fruits-vegetables",
+        },
+        {
+          name: "Apple (Shimla)",
+          description: "Hand-picked, no bruising.",
+          price: 190,
+          unit: "kg",
+          stock: 30,
+          category_slug: "fruits-vegetables",
+        },
+        {
+          name: "Coriander",
+          description: "Fresh bunch, harvested same morning.",
+          price: 15,
+          unit: "bunch",
+          stock: 40,
+          category_slug: "fruits-vegetables",
+        },
+        {
+          name: "Lemons",
+          description: "Juicy thin-skin lemons.",
+          price: 40,
+          unit: "kg",
+          stock: 25,
+          category_slug: "fruits-vegetables",
+        },
+        {
+          name: "Capsicum (green)",
+          description: "Crisp, dark green.",
+          price: 60,
+          unit: "kg",
+          stock: 20,
+          category_slug: "fruits-vegetables",
         },
       ],
     },
@@ -358,9 +401,11 @@ export async function POST() {
           .insert(catIds.map((cid) => ({ vendor_id: vendorId, category_id: cid })));
       }
 
-      // Listings — clear and re-insert (idempotent)
-      if (acc.vendor.listings) {
-        await admin.from("listings").delete().eq("vendor_id", vendorId);
+      // Listings — always clear, then re-insert if any.
+      // Always-clear lets a repurposed demo vendor (e.g. swapped from
+      // services to listings) shed its old rows cleanly.
+      await admin.from("listings").delete().eq("vendor_id", vendorId);
+      if (acc.vendor.listings && acc.vendor.listings.length) {
         await admin.from("listings").insert(
           acc.vendor.listings.map((l) => ({
             vendor_id: vendorId,
@@ -376,9 +421,9 @@ export async function POST() {
         );
       }
 
-      // Services
-      if (acc.vendor.services) {
-        await admin.from("services").delete().eq("vendor_id", vendorId);
+      // Services — same pattern: always clear, re-insert if any.
+      await admin.from("services").delete().eq("vendor_id", vendorId);
+      if (acc.vendor.services && acc.vendor.services.length) {
         await admin.from("services").insert(
           acc.vendor.services.map((s) => ({
             vendor_id: vendorId,

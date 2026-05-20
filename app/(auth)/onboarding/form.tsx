@@ -29,7 +29,6 @@ export function OnboardingForm({
   const [name, setName] = useState(initialName ?? "");
   const [flat, setFlat] = useState(initialFlat ?? "");
   const [tower, setTower] = useState(initialTower ?? "");
-  const [phone, setPhone] = useState("");
   const [busy, setBusy] = useState(false);
 
   async function submit(e: React.FormEvent) {
@@ -45,6 +44,9 @@ export function OnboardingForm({
       setBusy(false);
       return;
     }
+    // phone is the auth identifier (OTP login) and already lives on
+    // auth.users.phone -> public.profiles.phone via the on-signup trigger;
+    // we don't ask for it again here.
     const { error } = await supabase
       .from("profiles")
       .update({
@@ -53,7 +55,6 @@ export function OnboardingForm({
         society_id: societyId,
         flat_no: role === "resident" ? flat.trim() : null,
         tower: role === "resident" ? tower.trim() || null : null,
-        phone: phone.trim() || null,
       })
       .eq("id", user.id);
     setBusy(false);
@@ -127,19 +128,6 @@ export function OnboardingForm({
           </div>
         </div>
       ) : null}
-
-      <div className="space-y-2">
-        <Label htmlFor="phone">Phone (for orders)</Label>
-        <Input
-          id="phone"
-          type="tel"
-          inputMode="tel"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          placeholder="9999912345"
-          autoComplete="tel"
-        />
-      </div>
 
       <Button type="submit" disabled={busy} size="lg" className="w-full">
         {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Continue"}

@@ -34,7 +34,7 @@ export default async function ApplyPage() {
           can find you.
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-0 sm:pt-0">
         <ApplyForm
           societyId={profile.society_id}
           categories={cats ?? []}

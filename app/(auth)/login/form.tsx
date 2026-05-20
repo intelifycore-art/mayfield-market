@@ -9,7 +9,9 @@ import { Input, Label } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/components/ui/toast";
 import { fullSocietyName } from "@/lib/society";
-import { Loader2, Mail, ArrowRight, Store } from "lucide-react";
+import { Loader2, ArrowRight, Store } from "lucide-react";
+
+const COUNTRY = "+91"; // India only for the MVP
 
 export function LoginForm({
   next,
@@ -20,19 +22,25 @@ export function LoginForm({
 }) {
   const router = useRouter();
   const supabase = createClient();
-  const [step, setStep] = useState<"email" | "code">("email");
-  const [email, setEmail] = useState("");
+  const [step, setStep] = useState<"phone" | "code">("phone");
+  // 10-digit local number; the +91 prefix is added when sending
+  const [local, setLocal] = useState("");
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
 
   const isVendor = role === "vendor";
+  const fullPhone = COUNTRY + local;
+  const phoneReady = /^\d{10}$/.test(local);
 
   async function sendCode(e: React.FormEvent) {
     e.preventDefault();
-    if (!email) return;
+    if (!phoneReady) {
+      toast.error("Enter a 10-digit mobile number");
+      return;
+    }
     setBusy(true);
     const { error } = await supabase.auth.signInWithOtp({
-      email,
+      phone: fullPhone,
       options: { shouldCreateUser: true },
     });
     setBusy(false);
@@ -40,7 +48,7 @@ export function LoginForm({
       toast.error("Couldn't send the code", error.message);
       return;
     }
-    toast.success("Code sent", `Check ${email} for a 6-digit code.`);
+    toast.success("Code sent", `SMS to ${fullPhone}`);
     setStep("code");
   }
 
@@ -49,17 +57,15 @@ export function LoginForm({
     if (code.length < 6) return;
     setBusy(true);
     const { error } = await supabase.auth.verifyOtp({
-      email,
+      phone: fullPhone,
       token: code,
-      type: "email",
+      type: "sms",
     });
     setBusy(false);
     if (error) {
       toast.error("Wrong or expired code", error.message);
       return;
     }
-    // Decide where to send them. role=vendor lands on the vendor app
-    // (apply page if no record, dashboard otherwise).
     const target = next ?? (isVendor ? "/vendor" : "/");
     router.replace(target);
     router.refresh();
@@ -76,54 +82,66 @@ export function LoginForm({
             </div>
             <CardTitle className="text-2xl display">List your business</CardTitle>
             <CardDescription>
-              Sign in with email to manage your storefront at {fullSocietyName()}. New
-              vendors will be prompted to apply.
+              Sign in with your mobile number to manage your storefront at{" "}
+              {fullSocietyName()}. New vendors will be prompted to apply.
             </CardDescription>
           </>
         ) : next ? (
           <>
             <CardTitle className="text-2xl display">Sign in to continue</CardTitle>
             <CardDescription>
-              We need to know who you are so the vendor can deliver to your flat.
+              We need your mobile number so the vendor can reach you for delivery.
             </CardDescription>
           </>
         ) : (
           <>
             <CardTitle className="text-2xl display">Welcome to your block</CardTitle>
             <CardDescription>
-              Sign in with your email to start shopping with vendors in {fullSocietyName()}.
+              Sign in with your mobile number to start shopping with vendors in{" "}
+              {fullSocietyName()}.
             </CardDescription>
           </>
         )}
       </CardHeader>
-      <CardContent>
-        {step === "email" ? (
+      <CardContent className="pt-0 sm:pt-0">
+        {step === "phone" ? (
           <form onSubmit={sendCode} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email address</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-faint" />
+              <Label htmlFor="phone">Mobile number</Label>
+              <div className="flex items-stretch rounded-md border border-line bg-white focus-within:border-brand focus-within:ring-2 focus-within:ring-brand/30">
+                <span className="px-3 grid place-items-center text-sm text-ink-muted bg-bg-subtle border-r border-line rounded-l-md tabular">
+                  {COUNTRY}
+                </span>
                 <Input
-                  id="email"
-                  type="email"
-                  autoComplete="email"
+                  id="phone"
+                  type="tel"
+                  inputMode="numeric"
+                  autoComplete="tel-national"
                   required
-                  placeholder="you@example.com"
-                  className="pl-9"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  maxLength={10}
+                  placeholder="9876543210"
+                  className="border-0 focus-visible:ring-0 focus-visible:border-0 rounded-l-none tabular"
+                  value={local}
+                  onChange={(e) =>
+                    setLocal(e.target.value.replace(/\D/g, "").slice(0, 10))
+                  }
                 />
               </div>
               <p className="text-xs text-ink-soft">
-                We&apos;ll email you a 6-digit code. No password to remember.
+                We&apos;ll text you a 6-digit code. No password to remember.
               </p>
             </div>
-            <Button type="submit" disabled={busy || !email} className="w-full" size="lg">
+            <Button
+              type="submit"
+              disabled={busy || !phoneReady}
+              className="w-full"
+              size="lg"
+            >
               {busy ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <>
-                  Continue <ArrowRight className="h-4 w-4" />
+                  Send code <ArrowRight className="h-4 w-4" />
                 </>
               )}
             </Button>
@@ -160,16 +178,16 @@ export function LoginForm({
                 onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
               />
               <p className="text-xs text-ink-soft">
-                Sent to {email}.{" "}
+                Sent to {fullPhone}.{" "}
                 <button
                   type="button"
                   className="underline"
                   onClick={() => {
-                    setStep("email");
+                    setStep("phone");
                     setCode("");
                   }}
                 >
-                  Use a different email
+                  Use a different number
                 </button>
               </p>
             </div>

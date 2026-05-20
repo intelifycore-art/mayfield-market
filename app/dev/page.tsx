@@ -17,7 +17,7 @@ export default function DevPage() {
               setting <code>NEXT_PUBLIC_DEV_LOGIN=0</code>.
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0 sm:pt-0">
             <DevPanel />
           </CardContent>
         </Card>

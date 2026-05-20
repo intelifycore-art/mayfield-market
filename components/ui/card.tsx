@@ -40,11 +40,16 @@ export const CardDescription = React.forwardRef<
 ));
 CardDescription.displayName = "CardDescription";
 
+/**
+ * Symmetric padding by default — most CardContent in this app is used
+ * standalone (no CardHeader). When paired with a CardHeader, pass
+ * `className="pt-0 sm:pt-0"` to keep it flush to the header.
+ */
 export const CardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("p-4 pt-0 sm:p-5 sm:pt-0", className)} {...props} />
+  <div ref={ref} className={cn("p-4 sm:p-5", className)} {...props} />
 ));
 CardContent.displayName = "CardContent";
 

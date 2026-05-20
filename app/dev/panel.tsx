@@ -13,7 +13,7 @@ const DEV_ACCOUNTS = [
   { role: "vendor", email: "dev-vendor1@mayfield.local", label: "Vendor (Sharma's Mandi)" },
   { role: "vendor", email: "dev-vendor2@mayfield.local", label: "Vendor (Rajesh Plumbing)" },
   { role: "vendor", email: "dev-vendor3@mayfield.local", label: "Vendor (Verma Electricals)" },
-  { role: "vendor", email: "dev-vendor4@mayfield.local", label: "Vendor (Bright Minds Tuition)" },
+  { role: "vendor", email: "dev-vendor4@mayfield.local", label: "Vendor (Patel Vegetables)" },
   { role: "resident", email: "dev-resident@mayfield.local", label: "Resident" },
 ];
 

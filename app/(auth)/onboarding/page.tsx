@@ -47,7 +47,7 @@ export default async function OnboardingPage() {
           right marketplace.
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-0 sm:pt-0">
         <OnboardingForm
           societyId={society.id}
           initialName={profile.full_name}

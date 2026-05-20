@@ -3,6 +3,7 @@ import { getActiveSocietyId } from "@/lib/society-server";
 import { PageHeader } from "@/components/resident/page-header";
 import { CompareSearch } from "./search";
 import { CompareResults } from "./results";
+import { ProduceComparison } from "./produce";
 import { Empty } from "@/components/ui/empty";
 import { Scale } from "lucide-react";
 
@@ -18,6 +19,8 @@ export default async function ComparePage({
   const supabase = createClient();
 
   let rows: any[] = [];
+  let produce: any[] = [];
+
   if (q && societyId) {
     const tokens = q
       .toLowerCase()
@@ -46,31 +49,58 @@ export default async function ComparePage({
       .order("price", { ascending: true })
       .limit(40);
     rows = data ?? [];
+  } else if (societyId) {
+    // Default view: every fruits-vegetables listing across all vendors,
+    // grouped by item name. The ProduceComparison client component handles
+    // the grouping + per-vendor side-by-side rendering.
+    const { data: cat } = await supabase
+      .from("categories")
+      .select("id")
+      .eq("slug", "fruits-vegetables")
+      .maybeSingle();
+    if (cat?.id) {
+      const { data } = await supabase
+        .from("listings")
+        .select(
+          "id, name, price, unit, image_url, stock, vendor:vendors!inner(id, business_name, society_id, status, is_open, delivery_note)",
+        )
+        .eq("is_active", true)
+        .eq("category_id", cat.id)
+        .eq("vendor.society_id", societyId)
+        .eq("vendor.status", "approved")
+        .order("price", { ascending: true })
+        .limit(200);
+      produce = data ?? [];
+    }
   }
 
   return (
     <>
       <PageHeader
         title="Compare prices"
-        subtitle="Same item, every vendor — cheapest first"
+        subtitle="Fruits & vegetables across every vendor — side by side"
         backHref="/browse"
       />
       <div className="px-5 py-5 space-y-4 mb-10">
         <CompareSearch initial={q} />
-        {!q ? (
+        {q ? (
+          rows.length === 0 ? (
+            <Empty
+              icon={<Scale className="h-8 w-8" />}
+              title={`No vendor has "${q}" right now`}
+              description="Clear the search to see all fruits & vegetables side by side, or try a simpler word."
+            />
+          ) : (
+            <CompareResults query={q} rows={rows} />
+          )
+        ) : produce.length === 0 ? (
           <Empty
             icon={<Scale className="h-8 w-8" />}
-            title="What are you buying?"
-            description="Search a fruit, vegetable or any item to see every vendor's price side by side."
-          />
-        ) : rows.length === 0 ? (
-          <Empty
-            icon={<Scale className="h-8 w-8" />}
-            title={`No vendor has "${q}" right now`}
-            description="Try a simpler word, or check the AI assistant on the home page."
+            title="No produce listed yet"
+            description="Once vendors add fruits & vegetables, you'll see them here ranked by price."
           />
         ) : (
-          <CompareResults query={q} rows={rows} />
+          <ProduceComparison offers={produce} />
         )}
       </div>
     </>

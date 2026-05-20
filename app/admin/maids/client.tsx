@@ -340,7 +340,7 @@ function MaidForm({
           <X className="h-4 w-4" />
         </Button>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-0 sm:pt-0">
         <form
           onSubmit={(e) => {
             e.preventDefault();
