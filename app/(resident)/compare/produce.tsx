@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { Plus, Check, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -109,14 +110,35 @@ export function ProduceComparison({ offers }: { offers: Offer[] }) {
 
 function GroupCard({ group }: { group: Group }) {
   const cheapest = group.offers[0]!.price;
+  const thumb =
+    group.offers.find((o) => o.image_url)?.image_url ?? null;
   return (
     <Card>
       <CardContent className="p-3 sm:p-4">
-        <p className="text-sm font-semibold leading-tight">{group.name}</p>
-        <p className="text-2xs text-ink-soft mt-0.5">
-          {group.offers.length} vendors · sold by {group.unit}
-        </p>
-        <div className="mt-2 divide-y divide-line">
+        <div className="flex items-center gap-3">
+          <div className="relative h-12 w-12 rounded-md overflow-hidden bg-bg-subtle shrink-0">
+            {thumb ? (
+              <Image
+                src={thumb}
+                alt={group.name}
+                fill
+                className="object-cover"
+                sizes="48px"
+              />
+            ) : (
+              <div className="absolute inset-0 grid place-items-center text-2xs text-ink-faint px-1 text-center">
+                {group.name.split(" ")[0]}
+              </div>
+            )}
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold leading-tight">{group.name}</p>
+            <p className="text-2xs text-ink-soft mt-0.5">
+              {group.offers.length} vendors · sold by {group.unit}
+            </p>
+          </div>
+        </div>
+        <div className="mt-3 divide-y divide-line">
           {group.offers.map((o) => (
             <OfferRow key={o.id} offer={o} isBest={o.price === cheapest} />
           ))}

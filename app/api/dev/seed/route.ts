@@ -109,6 +109,7 @@ const ACCOUNTS: DevAccount[] = [
           unit: "kg",
           stock: 80,
           category_slug: "fruits-vegetables",
+          image_url: "https://images.unsplash.com/photo-1518467166778-b88f373ffec7?w=400&q=80",
         },
         {
           name: "Bananas (yelakki)",
@@ -126,6 +127,7 @@ const ACCOUNTS: DevAccount[] = [
           unit: "kg",
           stock: 25,
           category_slug: "fruits-vegetables",
+          image_url: "https://images.unsplash.com/photo-1604881991720-f91add269bed?w=400&q=80",
         },
         {
           name: "Apple (Shimla)",
@@ -245,6 +247,7 @@ const ACCOUNTS: DevAccount[] = [
           unit: "kg",
           stock: 40,
           category_slug: "fruits-vegetables",
+          image_url: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400&q=80",
         },
         {
           name: "Onions (nashik)",
@@ -253,6 +256,7 @@ const ACCOUNTS: DevAccount[] = [
           unit: "kg",
           stock: 80,
           category_slug: "fruits-vegetables",
+          image_url: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=400&q=80",
         },
         {
           name: "Potatoes (chipsona)",
@@ -261,6 +265,7 @@ const ACCOUNTS: DevAccount[] = [
           unit: "kg",
           stock: 100,
           category_slug: "fruits-vegetables",
+          image_url: "https://images.unsplash.com/photo-1518467166778-b88f373ffec7?w=400&q=80",
         },
         {
           name: "Bananas (yelakki)",
@@ -269,6 +274,7 @@ const ACCOUNTS: DevAccount[] = [
           unit: "dozen",
           stock: 25,
           category_slug: "fruits-vegetables",
+          image_url: "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=400&q=80",
         },
         {
           name: "Apple (Shimla)",
@@ -277,6 +283,7 @@ const ACCOUNTS: DevAccount[] = [
           unit: "kg",
           stock: 30,
           category_slug: "fruits-vegetables",
+          image_url: "https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=400&q=80",
         },
         {
           name: "Coriander",
@@ -285,6 +292,7 @@ const ACCOUNTS: DevAccount[] = [
           unit: "bunch",
           stock: 40,
           category_slug: "fruits-vegetables",
+          image_url: "https://images.unsplash.com/photo-1582281298055-e25b84a30b0b?w=400&q=80",
         },
         {
           name: "Lemons",
@@ -293,6 +301,7 @@ const ACCOUNTS: DevAccount[] = [
           unit: "kg",
           stock: 25,
           category_slug: "fruits-vegetables",
+          image_url: "https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=400&q=80",
         },
         {
           name: "Capsicum (green)",
@@ -301,6 +310,7 @@ const ACCOUNTS: DevAccount[] = [
           unit: "kg",
           stock: 20,
           category_slug: "fruits-vegetables",
+          image_url: "https://images.unsplash.com/photo-1525607551316-4a8e16d1f9ba?w=400&q=80",
         },
       ],
     },
