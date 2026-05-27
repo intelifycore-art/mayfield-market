@@ -22,7 +22,7 @@ import {
   Mail,
   KeyRound,
   Sparkles,
-  Mailbox,
+  MessageSquare,
 } from "lucide-react";
 
 // Demo credentials — provisioned by the dev seed. Visible on the login page
@@ -30,7 +30,10 @@ import {
 const DEMO_EMAIL = "demo@mayfield.market";
 const DEMO_PASSWORD = "mayfield2026";
 
-type Mode = "password" | "signup" | "otp-email" | "otp-code";
+// India only for the MVP — +91 prefix is fixed.
+const COUNTRY = "+91";
+
+type Mode = "password" | "signup" | "otp-phone" | "otp-code";
 
 export function LoginForm({
   next,
@@ -44,8 +47,13 @@ export function LoginForm({
   const [mode, setMode] = useState<Mode>("password");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  /** 10-digit local mobile number (+91 prefix added at send time). */
+  const [phoneLocal, setPhoneLocal] = useState("");
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
+
+  const fullPhone = COUNTRY + phoneLocal;
+  const phoneReady = /^\d{10}$/.test(phoneLocal);
 
   const isVendor = role === "vendor";
   const showDemo = process.env.NEXT_PUBLIC_SHOW_DEMO_LOGIN !== "0";
@@ -92,10 +100,13 @@ export function LoginForm({
 
   async function sendOtp(e: React.FormEvent) {
     e.preventDefault();
-    if (!email.trim()) return;
+    if (!phoneReady) {
+      toast.error("Enter a 10-digit mobile number");
+      return;
+    }
     setBusy(true);
     const { error } = await supabase.auth.signInWithOtp({
-      email: email.trim(),
+      phone: fullPhone,
       options: { shouldCreateUser: true },
     });
     setBusy(false);
@@ -103,10 +114,7 @@ export function LoginForm({
       toast.error("Couldn't send the code", error.message);
       return;
     }
-    toast.success(
-      "Check your email",
-      "Type the 6-digit code OR click the link inside.",
-    );
+    toast.success("SMS sent", `6-digit code on its way to ${fullPhone}`);
     setMode("otp-code");
   }
 
@@ -115,9 +123,9 @@ export function LoginForm({
     if (code.length < 6) return;
     setBusy(true);
     const { error } = await supabase.auth.verifyOtp({
-      email: email.trim(),
+      phone: fullPhone,
       token: code,
-      type: "email",
+      type: "sms",
     });
     setBusy(false);
     if (error) {
@@ -160,10 +168,10 @@ export function LoginForm({
         desc: `New to ${fullSocietyName()}? Set up an email and password to start shopping.`,
       };
     }
-    if (mode === "otp-email" || mode === "otp-code") {
+    if (mode === "otp-phone" || mode === "otp-code") {
       return {
         title: "Sign in with a code",
-        desc: "Enter your email — we'll send a 6-digit code (and a sign-in link as backup).",
+        desc: "Enter your mobile number — we'll text a 6-digit code.",
       };
     }
     return {
@@ -204,11 +212,11 @@ export function LoginForm({
               <div className="flex items-center justify-between gap-2 text-xs text-ink-soft">
                 <button
                   type="button"
-                  onClick={() => setMode("otp-email")}
+                  onClick={() => setMode("otp-phone")}
                   className="inline-flex items-center gap-1 text-brand underline"
                 >
-                  <Mailbox className="h-3 w-3" />
-                  Sign in with a code instead
+                  <MessageSquare className="h-3 w-3" />
+                  SMS code instead
                 </button>
                 <button
                   type="button"
@@ -253,12 +261,38 @@ export function LoginForm({
                 </button>
               </p>
             </form>
-          ) : mode === "otp-email" ? (
+          ) : mode === "otp-phone" ? (
             <form onSubmit={sendOtp} className="space-y-4">
-              <EmailField email={email} setEmail={setEmail} />
+              <div className="space-y-2">
+                <Label htmlFor="phone">Mobile number</Label>
+                <div className="flex items-stretch rounded-md border border-line bg-white focus-within:border-brand focus-within:ring-2 focus-within:ring-brand/30">
+                  <span className="px-3 grid place-items-center text-sm text-ink-muted bg-bg-subtle border-r border-line rounded-l-md tabular">
+                    {COUNTRY}
+                  </span>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    inputMode="numeric"
+                    autoComplete="tel-national"
+                    required
+                    maxLength={10}
+                    placeholder="9876543210"
+                    className="border-0 focus-visible:ring-0 focus-visible:border-0 rounded-l-none tabular"
+                    value={phoneLocal}
+                    onChange={(e) =>
+                      setPhoneLocal(
+                        e.target.value.replace(/\D/g, "").slice(0, 10),
+                      )
+                    }
+                  />
+                </div>
+                <p className="text-xs text-ink-soft">
+                  We&apos;ll text you a 6-digit code. No password to remember.
+                </p>
+              </div>
               <Button
                 type="submit"
-                disabled={busy || !email.trim()}
+                disabled={busy || !phoneReady}
                 className="w-full"
                 size="lg"
               >
@@ -298,9 +332,7 @@ export function LoginForm({
                   onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
                 />
                 <p className="text-xs text-ink-soft">
-                  Sent to {email}. If you only see a link in the email, click it
-                  and you&apos;ll be signed in — or come back here once the
-                  6-digit code is configured.
+                  Sent by SMS to {fullPhone}.
                 </p>
               </div>
               <Button
@@ -315,12 +347,12 @@ export function LoginForm({
                 <button
                   type="button"
                   onClick={() => {
-                    setMode("otp-email");
+                    setMode("otp-phone");
                     setCode("");
                   }}
                   className="underline"
                 >
-                  Use a different email
+                  Use a different number
                 </button>
               </p>
             </form>
