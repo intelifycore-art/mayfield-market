@@ -5,7 +5,11 @@ import { OnboardingForm } from "./form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SOCIETY, fullSocietyName } from "@/lib/society";
 
-export default async function OnboardingPage() {
+export default async function OnboardingPage({
+  searchParams,
+}: {
+  searchParams: { role?: string };
+}) {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login");
 
@@ -38,13 +42,18 @@ export default async function OnboardingPage() {
     redirect("/");
   }
 
+  const vendorIntent = searchParams.role === "vendor";
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-2xl display">Last step</CardTitle>
+        <CardTitle className="text-2xl display">
+          {vendorIntent ? "Quick check before you list" : "Last step"}
+        </CardTitle>
         <CardDescription>
-          Welcome to {fullSocietyName()}. Tell us a little about you so we can show the
-          right marketplace.
+          {vendorIntent
+            ? `Welcome to ${fullSocietyName()}. We just need your name — then you'll fill in your business details.`
+            : `Welcome to ${fullSocietyName()}. Tell us a little about you so we can show the right marketplace.`}
         </CardDescription>
       </CardHeader>
       <CardContent className="pt-0 sm:pt-0">
@@ -53,6 +62,7 @@ export default async function OnboardingPage() {
           initialName={profile.full_name}
           initialFlat={profile.flat_no}
           initialTower={profile.tower}
+          forceRole={vendorIntent ? "vendor" : undefined}
         />
       </CardContent>
     </Card>

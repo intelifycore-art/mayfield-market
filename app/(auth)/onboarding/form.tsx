@@ -17,15 +17,18 @@ export function OnboardingForm({
   initialName,
   initialFlat,
   initialTower,
+  forceRole,
 }: {
   societyId: string;
   initialName: string | null;
   initialFlat: string | null;
   initialTower: string | null;
+  /** If set, hide the role picker and lock the role (e.g. vendor signup). */
+  forceRole?: Role;
 }) {
   const router = useRouter();
   const supabase = createClient();
-  const [role, setRole] = useState<Role>("resident");
+  const [role, setRole] = useState<Role>(forceRole ?? "resident");
   const [name, setName] = useState(initialName ?? "");
   const [flat, setFlat] = useState(initialFlat ?? "");
   const [tower, setTower] = useState(initialTower ?? "");
@@ -73,25 +76,27 @@ export function OnboardingForm({
 
   return (
     <form onSubmit={submit} className="space-y-5">
-      <div>
-        <Label>I am a</Label>
-        <div className="mt-2 grid grid-cols-2 gap-2">
-          <RoleTile
-            active={role === "resident"}
-            onClick={() => setRole("resident")}
-            icon={<Home className="h-4 w-4" />}
-            title="Resident"
-            subtitle="Order from local vendors"
-          />
-          <RoleTile
-            active={role === "vendor"}
-            onClick={() => setRole("vendor")}
-            icon={<Store className="h-4 w-4" />}
-            title="Vendor"
-            subtitle="Sell or offer services"
-          />
+      {forceRole ? null : (
+        <div>
+          <Label>I am a</Label>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            <RoleTile
+              active={role === "resident"}
+              onClick={() => setRole("resident")}
+              icon={<Home className="h-4 w-4" />}
+              title="Resident"
+              subtitle="Order from local vendors"
+            />
+            <RoleTile
+              active={role === "vendor"}
+              onClick={() => setRole("vendor")}
+              icon={<Store className="h-4 w-4" />}
+              title="Vendor"
+              subtitle="Sell or offer services"
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="space-y-2">
         <Label htmlFor="name">Full name</Label>

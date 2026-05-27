@@ -33,19 +33,78 @@ export default async function VendorDashboard() {
   if (!vendor) redirect("/vendor/apply");
 
   if (vendor.status === "pending") {
+    const { data: cats } = await supabase
+      .from("vendor_categories")
+      .select("category:categories(name)")
+      .eq("vendor_id", vendor.id);
     return (
-      <Card>
-        <CardContent className="p-8 text-center">
-          <Badge variant="warning" className="mb-3">
-            Awaiting approval
-          </Badge>
-          <h2 className="display text-xl font-semibold">Hold tight</h2>
-          <p className="text-sm text-ink-muted mt-2 max-w-md mx-auto">
-            Your application is with the RWA admin. Once approved, residents in your
-            block will start seeing your storefront here.
-          </p>
-        </CardContent>
-      </Card>
+      <div className="space-y-4 max-w-2xl mx-auto">
+        <Card>
+          <CardContent className="p-6 sm:p-8 text-center">
+            <Badge variant="warning" className="mb-3">
+              Awaiting approval
+            </Badge>
+            <h2 className="display text-xl sm:text-2xl font-semibold">
+              Hold tight, {vendor.business_name}
+            </h2>
+            <p className="text-sm text-ink-muted mt-2 max-w-md mx-auto">
+              The RWA admin usually reviews new vendors within a day. The
+              moment you&apos;re approved, residents in your block can find
+              you and place orders.
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4 sm:p-5 space-y-3">
+            <h3 className="text-sm font-semibold">What you submitted</h3>
+
+            <Field label="Business">{vendor.business_name}</Field>
+            {vendor.tagline ? (
+              <Field label="Tagline">{vendor.tagline}</Field>
+            ) : null}
+            {vendor.description ? (
+              <Field label="About">
+                <span className="text-ink-muted">{vendor.description}</span>
+              </Field>
+            ) : null}
+            {cats && cats.length > 0 ? (
+              <Field label="Categories">
+                {cats
+                  .map((vc: any) => vc.category?.name)
+                  .filter(Boolean)
+                  .join(", ")}
+              </Field>
+            ) : null}
+            <Field label="Phone">
+              <span className="tabular">{vendor.contact_phone ?? "—"}</span>
+            </Field>
+            {vendor.whatsapp_phone &&
+            vendor.whatsapp_phone !== vendor.contact_phone ? (
+              <Field label="WhatsApp">
+                <span className="tabular">{vendor.whatsapp_phone}</span>
+              </Field>
+            ) : null}
+            {vendor.payout_upi ? (
+              <Field label="UPI">{vendor.payout_upi}</Field>
+            ) : null}
+            {vendor.delivery_note ? (
+              <Field label="Delivery note">{vendor.delivery_note}</Field>
+            ) : null}
+
+            <p className="text-2xs text-ink-soft pt-2">
+              Spotted a typo? You can edit everything from your{" "}
+              <Link
+                href="/vendor/profile"
+                className="text-brand underline"
+              >
+                profile page
+              </Link>{" "}
+              even before approval.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
@@ -212,6 +271,23 @@ export default async function VendorDashboard() {
           </div>
         )}
       </section>
+    </div>
+  );
+}
+
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="grid grid-cols-[120px_1fr] gap-2 items-start text-sm">
+      <p className="text-2xs uppercase tracking-wider text-ink-soft pt-0.5">
+        {label}
+      </p>
+      <p className="text-ink leading-snug">{children}</p>
     </div>
   );
 }
